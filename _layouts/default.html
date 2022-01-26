@@ -22,9 +22,6 @@
             <li>{{post.date | date_to_string}}<a href="{{site.baseurl}}{{post.url}}">{{post.title}}</a></li>
           {%endfor%}
         </ul>
-        {% if site.logo %}
-          <img src="{{site.logo | relative_url}}" alt="Logo" />
-        {% endif %}
 
         <p>{{ site.description | default: site.github.project_tagline }}</p>
 
