@@ -1,1 +1,6 @@
 theme: jekyll-theme-minimal
+links1:
+  - name: 所有
+    url: /
+    type: recent
+    external: false
