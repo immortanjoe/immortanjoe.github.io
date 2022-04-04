@@ -265,7 +265,7 @@ textarea {
 #secondary {
     float:right;
     width:245px;
-    border-left:1px solid #ddd;
+    border-left:0px solid #ddd;
     padding-left:35px;
     word-wrap:break-word;
     display:block;
