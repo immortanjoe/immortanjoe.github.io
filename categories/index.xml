@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Leaky Cauldron</title>
-    <link>fangzhou.blog/categories/</link>
+    <link>immortanjoe.github.io/categories/</link>
     <description>Recent content in Categories on Leaky Cauldron</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>zh-CN</language><atom:link href="fangzhou.blog/categories/index.xml" rel="self" type="application/rss+xml" />
+    <language>zh-CN</language><atom:link href="immortanjoe.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
