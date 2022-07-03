@@ -6,7 +6,16 @@
     <description>Recent content on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 25 Mar 2019 19:34:22 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 27 Jun 2022 22:55:22 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SRS如何处理RTP丢包</title>
+      <link>https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/</link>
+      <pubDate>Mon, 27 Jun 2022 22:55:22 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/</guid>
+      <description>问题现象 摄像头基于GB28181协议，通过UDP推流到srs后，srs的query_channel接口无法获取视频数据的信息，video字段为null。查看srs日志，发现出现大量的”unkonw ps data“和”decode ps packet error“，并且出现Warn日志 ”requesti</description>
+    </item>
+    
     <item>
       <title>Hello world</title>
       <link>https://fangzhou.blog/post/2019-03-25-start/</link>
