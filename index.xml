@@ -17,6 +17,15 @@
     </item>
     
     <item>
+      <title>RTP时间戳错误引起的视频花屏</title>
+      <link>https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/</link>
+      <pubDate>Sun, 26 Jun 2022 10:41:52 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/</guid>
+      <description>问题现象 第三方设备通过GB28181协议向SRS推流，通过SRS转为FLV，再由客户端播放，每隔n秒视频就会出现卡顿、花屏。 问题分析 把设备发送到SRS的数据抓包，通过wireshark分析，发现有几个明显问题： 时间间隔(Delta)异常。按照GB28181规范，视频采样频率是90</description>
+    </item>
+    
+    <item>
       <title>Hello world</title>
       <link>https://fangzhou.blog/post/2019-03-25-start/</link>
       <pubDate>Mon, 25 Mar 2019 19:34:22 +0800</pubDate>

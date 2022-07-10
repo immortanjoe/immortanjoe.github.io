@@ -99,6 +99,22 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年6月26日
+        </date>
+        
+        <div class="post-content">
+            问题现象 第三方设备通过GB28181协议向SRS推流，通过SRS转为FLV，再由客户端播放，每隔n秒视频就会出现卡顿、花屏。 问题分析 把设备发送到SRS的数据抓包，通过wireshark分析，发现有几个明显问题： 时间间隔(Delta)异常。按照GB28181规范，视频采样频率是90……
+        </div>
+        <p class="readmore"><a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
             </h1>
         </header>
@@ -176,6 +192,10 @@ if (!doNotTrack) {
     
     <li>
         <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
     </li>
     
     <li>
