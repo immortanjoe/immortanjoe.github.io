@@ -6,7 +6,16 @@
     <description>Recent content in 音视频 on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 27 Jun 2022 22:55:22 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 10 Jul 2022 09:54:49 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SrsHttpMuxEntry缓存引起的SRS内存泄漏</title>
+      <link>https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/</link>
+      <pubDate>Sun, 10 Jul 2022 09:54:49 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/</guid>
+      <description>问题现象 SRS在线上运行时，内存会一直缓慢地增加 问题分析 通过valgrind分析，发现SrsHttpServeMux中的entries对象不会被释放。 如果http请求的URI频繁变化，会导致entries不断增大。 class SrsHttpServeMux : public ISrsHttpServeMux { ... // The pattern handler, to handle the http request. std::map&amp;lt;std::string, SrsHttpMuxEntry*&amp;gt; entries; ... } 我猜想，SRS设计时，只</description>
+    </item>
+    
     <item>
       <title>SRS如何处理RTP丢包</title>
       <link>https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/</link>
