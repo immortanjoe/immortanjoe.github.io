@@ -9,20 +9,21 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>归档 | 方舟的博客</title>
-    <meta property="og:title" content="归档 - 方舟的博客">
+    <title>SRS | 方舟的博客</title>
+    <meta property="og:title" content="SRS - 方舟的博客">
     <meta property="og:type" content="article">
         
         
     <meta name="Keywords" content="golang,istio">
-    <meta name="description" content="归档">
+    <meta name="description" content="SRS">
         
     <meta name="author" content="方舟">
-    <meta property="og:url" content="https://fangzhou.blog/archives/">
+    <meta property="og:url" content="https://fangzhou.blog/tags/SRS/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
     <link rel="stylesheet" href='/css/style.css'>
+    <link rel="alternate" type="application/rss+xml" href="https://fangzhou.blog/tags/SRS/index.xml" title="方舟的博客" />
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
@@ -55,7 +56,7 @@
                     
                     <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
                     
-                    <a class="current" href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
                     
                     <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
                     
@@ -71,33 +72,68 @@
 
                 <div class="col-8" id="main">
                     
-<div class="post-archive">
+<div class="res-cons">
     
-    <h2>2022</h2>
-    <ul class="listing">
-        
-        <li>
-            <span class="date">2022/06/27</span>
-            <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
-        </li>
-        
-        <li>
-            <span class="date">2022/06/26</span>
-            <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
-        </li>
-        
-    </ul>
+    <h3 class="archive-title">
+        包含标签
+        <span class="keyword">SRS</span>
+        的文章
+    </h3>
     
-    <h2>2019</h2>
-    <ul class="listing">
-        
-        <li>
-            <span class="date">2019/03/25</span>
-            <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
-        </li>
-        
-    </ul>
+
     
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/">SRS如何处理RTP丢包</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年6月27日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%9F%B3%E8%A7%86%E9%A2%91'>音视频</a>
+            
+        </div>
+        
+        <div class="post-content">
+            问题现象 摄像头基于GB28181协议，通过UDP推流到srs后，srs的query_channel接口无法获取视频数据的信息，video字段为null。查看srs日志，发现出现大量的”unkonw ps data“和”decode ps packet error“，并且出现Warn日志 ”requesti……
+            <p class="readmore"><a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">RTP时间戳错误引起的视频花屏</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年6月26日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%9F%B3%E8%A7%86%E9%A2%91'>音视频</a>
+            
+        </div>
+        
+        <div class="post-content">
+            问题现象 第三方设备通过GB28181协议向SRS推流，通过SRS转为FLV，再由客户端播放，每隔n秒视频就会出现卡顿、花屏。 问题分析 把设备发送到SRS的数据抓包，通过wireshark分析，发现有几个明显问题： 时间间隔(Delta)异常。按照GB28181规范，视频采样频率是90……
+            <p class="readmore"><a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">阅读全文</a></p>
+        </div>
+    </article>
+    
+
+    
+
+
+
+
 
 </div>
 
@@ -108,16 +144,6 @@
 </footer>
 
 
-    
-    <script type="text/javascript">
-        window.MathJax = {
-            tex2jax: {
-                inlineMath: [['$', '$']],
-                processEscapes: true
-                }
-            };
-    </script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
 
 <a id="rocket" href="#top"></a>
 <script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>

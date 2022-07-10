@@ -11,13 +11,13 @@
     <loc>https://fangzhou.blog/post/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/tags/ps%E6%B5%81/</loc>
+    <loc>https://fangzhou.blog/tags/PS%E6%B5%81/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/tags/srs/</loc>
+    <loc>https://fangzhou.blog/tags/SRS/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/</loc>
@@ -26,7 +26,7 @@
     <loc>https://fangzhou.blog/tags/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/tags/udp/</loc>
+    <loc>https://fangzhou.blog/tags/UDP/</loc>
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/</loc>
@@ -39,6 +39,9 @@
     <lastmod>2022-06-27T22:55:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/</loc>
+    <lastmod>2022-06-26T10:41:52+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/</loc>
     <lastmod>2022-06-26T10:41:52+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/2019-03-25-start/</loc>
