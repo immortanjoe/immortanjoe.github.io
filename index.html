@@ -76,6 +76,22 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年7月23日
+        </date>
+        
+        <div class="post-content">
+            背景 最近看了Nginx升级相关的代码，虽然不能直接应用到业务逻辑相对复杂的服务中，但其中的思想还是可以借鉴的。 序列图 升级 1. 收到SIGUSR2 nginx进程收到SIGUSR2信号后，准备开始升级。 static void ngx_signal_handler(int signo, siginfo_t *siginfo, void *ucontext) { ... case ngx_signal_value(NGX_CHANGEBIN_SIGNAL): if (ngx_getppid() == ngx_parent || ngx_new_binary &gt; 0) { action = &#34;, ignoring&#34;; ignore = 1; break; } ngx_change_binary = 1; action = &#34;, changing binary&#34;; break; ... } void ngx_master_process_cycle(ngx_cycle_t……
+        </div>
+        <p class="readmore"><a href="https://fangzhou.blog/post/how-nginx-upgrades/">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
             </h1>
         </header>
@@ -242,6 +258,10 @@ if (!doNotTrack) {
     <section class="widget">
         <h3 class="widget-title">最近文章</h3>
 <ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+    </li>
     
     <li>
         <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>

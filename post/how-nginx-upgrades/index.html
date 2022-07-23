@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Nginx如何实现热升级/平滑升级 | 方舟的博客</title>
+    <meta property="og:title" content="Nginx如何实现热升级/平滑升级 - 方舟的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-07-23T15:17:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-07-23T15:17:57&#43;08:00'>
+        
+    <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
+    <meta name="description" content="Nginx如何实现热升级/平滑升级">
+        
+    <meta name="author" content="方舟">
+    <meta property="og:url" content="https://fangzhou.blog/post/how-nginx-upgrades/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://fangzhou.blog">
+                        方舟的博客
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://fangzhou.blog">首页</a>
+                    
+                    <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-收到sigusr2">1. 收到SIGUSR2</a></li>
+    <li><a href="#2-保存listening-fds准备启动新进程">2. 保存listening fds，准备启动新进程</a></li>
+    <li><a href="#3-fork一个子进程执行execve启动新的nginx-master">3. fork一个子进程，执行execve启动新的nginx-master</a></li>
+    <li><a href="#4-启动新的nginx-master从环境变量中读取listening-fds">4. 启动新的nginx-master，从环境变量中读取listening fds</a></li>
+    <li><a href="#5-补全继承的socket信息">5. 补全继承的socket信息</a></li>
+    <li><a href="#6-打开listening-socket">6. 打开listening socket</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#1-收到sigquit信号">1. 收到SIGQUIT信号</a></li>
+    <li><a href="#2-关闭监听释放空闲连接">2. 关闭监听，释放空闲连接</a></li>
+    <li><a href="#3等待连接消亡">3.等待连接消亡</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#1新的进程为什么不创建新的listening-socket呢">1、新的进程为什么不创建新的listening socket呢？</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if (leftPos < 220) {
+                postToc.css({ "width": leftPos - 10, "margin-left": (0 - leftPos) })
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+
+        if ($("#TableOfContents").children().length < 1) {
+            $(".post-toc").remove();
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Nginx如何实现热升级/平滑升级</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年7月23日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <h1 id="背景">背景</h1>
+<p>最近看了Nginx升级相关的代码，虽然不能直接应用到业务逻辑相对复杂的服务中，但其中的思想还是可以借鉴的。</p>
+<h1 id="序列图">序列图</h1>
+<p>
+        <img class="mx-auto" alt="avatar" src="/img/nginx-upgrade-process.png" />   
+    </p>
+<h1 id="升级">升级</h1>
+<h2 id="1-收到sigusr2">1. 收到SIGUSR2</h2>
+<p>nginx进程收到SIGUSR2信号后，准备开始升级。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_signal_handler</span>(<span style="color:#458;font-weight:bold">int</span> signo, siginfo_t <span style="color:#000;font-weight:bold">*</span>siginfo, <span style="color:#458;font-weight:bold">void</span> <span style="color:#000;font-weight:bold">*</span>ucontext)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">case</span> ngx_signal_value(NGX_CHANGEBIN_SIGNAL)<span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> (ngx_getppid() <span style="color:#000;font-weight:bold">==</span> ngx_parent <span style="color:#000;font-weight:bold">||</span> ngx_new_binary <span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#099">0</span>) {
+</span></span><span style="display:flex;"><span>                action <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;, ignoring&#34;</span>;
+</span></span><span style="display:flex;"><span>                ignore <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">break</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            ngx_change_binary <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>            action <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;, changing binary&#34;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">break</span>;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#458;font-weight:bold">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_master_process_cycle</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (ngx_change_binary) {
+</span></span><span style="display:flex;"><span>            ngx_change_binary <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>;
+</span></span><span style="display:flex;"><span>            ngx_log_error(NGX_LOG_NOTICE, cycle<span style="color:#000;font-weight:bold">-&gt;</span>log, <span style="color:#099">0</span>, <span style="color:#d14">&#34;changing binary&#34;</span>);
+</span></span><span style="display:flex;"><span>            ngx_new_binary <span style="color:#000;font-weight:bold">=</span> ngx_exec_new_binary(cycle, ngx_argv);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="2-保存listening-fds准备启动新进程">2. 保存listening fds，准备启动新进程</h2>
+<p>为了新进程启动后能够无损接管老进程的连接，老进程启动新进程之前，会将自己的<code>cycle-&gt;listening</code> fds序列化为字符串，保存在名为<code>NGINX</code>的环境变量中。</p>
+<p>并且重命名pid文件<code>nginx.pid</code>为<code>nginx.pid.oldbin</code>，为新的进程腾出位置。</p>
+<p>然后通过<code>ngx_execute</code>启动新的进程，而且启动失败的话，还要将pid文件还原。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_pid_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_exec_new_binary</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle, <span style="color:#458;font-weight:bold">char</span> <span style="color:#000;font-weight:bold">*</span><span style="color:#000;font-weight:bold">const</span> <span style="color:#000;font-weight:bold">*</span>argv)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    n <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">2</span>;
+</span></span><span style="display:flex;"><span>    env <span style="color:#000;font-weight:bold">=</span> ngx_set_environment(cycle, <span style="color:#000;font-weight:bold">&amp;</span>n);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    p <span style="color:#000;font-weight:bold">=</span> ngx_cpymem(var, NGINX_VAR <span style="color:#d14">&#34;=&#34;</span>, <span style="color:#000;font-weight:bold">sizeof</span>(NGINX_VAR));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ls <span style="color:#000;font-weight:bold">=</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.elts;
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> (i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>        p <span style="color:#000;font-weight:bold">=</span> ngx_sprintf(p, <span style="color:#d14">&#34;%ud;&#34;</span>, ls[i].fd);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">*</span>p <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    env[n<span style="color:#000;font-weight:bold">++</span>] <span style="color:#000;font-weight:bold">=</span> var;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (ngx_rename_file(ccf<span style="color:#000;font-weight:bold">-&gt;</span>pid.data, ccf<span style="color:#000;font-weight:bold">-&gt;</span>oldpid.data) <span style="color:#000;font-weight:bold">==</span> NGX_FILE_ERROR) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> NGX_INVALID_PID;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pid <span style="color:#000;font-weight:bold">=</span> ngx_execute(cycle, <span style="color:#000;font-weight:bold">&amp;</span>ctx);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (pid <span style="color:#000;font-weight:bold">==</span> NGX_INVALID_PID) {
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (ngx_rename_file(ccf<span style="color:#000;font-weight:bold">-&gt;</span>oldpid.data, ccf<span style="color:#000;font-weight:bold">-&gt;</span>pid.data)
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">==</span> NGX_FILE_ERROR)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="3-fork一个子进程执行execve启动新的nginx-master">3. fork一个子进程，执行execve启动新的nginx-master</h2>
+<p><code>ngx_execute</code>中会fork一个子进程，通过子进程执行<code>execve</code>拉起新的master进程。新的master进程继承了老进程的环境变量。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_pid_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_execute</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle, ngx_exec_ctx_t <span style="color:#000;font-weight:bold">*</span>ctx)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> ngx_spawn_process(cycle, ngx_execute_proc, ctx, ctx<span style="color:#000;font-weight:bold">-&gt;</span>name,
+</span></span><span style="display:flex;"><span>                             NGX_PROCESS_DETACHED);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_execute_proc</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle, <span style="color:#458;font-weight:bold">void</span> <span style="color:#000;font-weight:bold">*</span>data)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ngx_exec_ctx_t  <span style="color:#000;font-weight:bold">*</span>ctx <span style="color:#000;font-weight:bold">=</span> data;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (execve(ctx<span style="color:#000;font-weight:bold">-&gt;</span>path, ctx<span style="color:#000;font-weight:bold">-&gt;</span>argv, ctx<span style="color:#000;font-weight:bold">-&gt;</span>envp) <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>) {
+</span></span><span style="display:flex;"><span>        ngx_log_error(NGX_LOG_ALERT, cycle<span style="color:#000;font-weight:bold">-&gt;</span>log, ngx_errno,
+</span></span><span style="display:flex;"><span>                      <span style="color:#d14">&#34;execve() failed while executing %s </span><span style="color:#d14">\&#34;</span><span style="color:#d14">%s</span><span style="color:#d14">\&#34;</span><span style="color:#d14">&#34;</span>,
+</span></span><span style="display:flex;"><span>                      ctx<span style="color:#000;font-weight:bold">-&gt;</span>name, ctx<span style="color:#000;font-weight:bold">-&gt;</span>path);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    exit(<span style="color:#099">1</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="4-启动新的nginx-master从环境变量中读取listening-fds">4. 启动新的nginx-master，从环境变量中读取listening fds</h2>
+<p>新的进程启动后，会从<code>NGINX</code>环境变量中读取老进程的listening fds，并将fds加到<code>cycle-&gt;listening</code>中</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">static</span> ngx_int_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_add_inherited_sockets</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    inherited <span style="color:#000;font-weight:bold">=</span> (u_char <span style="color:#000;font-weight:bold">*</span>) getenv(NGINX_VAR);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> (p <span style="color:#000;font-weight:bold">=</span> inherited, v <span style="color:#000;font-weight:bold">=</span> p; <span style="color:#000;font-weight:bold">*</span>p; p<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">*</span>p <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;:&#39;</span> <span style="color:#000;font-weight:bold">||</span> <span style="color:#000;font-weight:bold">*</span>p <span style="color:#000;font-weight:bold">==</span> <span style="color:#d14">&#39;;&#39;</span>) {
+</span></span><span style="display:flex;"><span>            s <span style="color:#000;font-weight:bold">=</span> ngx_atoi(v, p <span style="color:#000;font-weight:bold">-</span> v);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>            ls <span style="color:#000;font-weight:bold">=</span> ngx_array_push(<span style="color:#000;font-weight:bold">&amp;</span>cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>            ls<span style="color:#000;font-weight:bold">-&gt;</span>fd <span style="color:#000;font-weight:bold">=</span> (ngx_socket_t) s;
+</span></span><span style="display:flex;"><span>            ls<span style="color:#000;font-weight:bold">-&gt;</span>inherited <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> ...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> ngx_set_inherited_sockets(cycle);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="5-补全继承的socket信息">5. 补全继承的socket信息</h2>
+<p>获取到老进程的listening fd后，还需要通过一系列<code>getsockopt</code>调用补齐socket信息.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_int_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_set_inherited_sockets</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    ls <span style="color:#000;font-weight:bold">=</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.elts;
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> (i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (getsockname(ls[i].fd, ls[i].sockaddr, <span style="color:#000;font-weight:bold">&amp;</span>ls[i].socklen) <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (getsockopt(ls[i].fd, SOL_SOCKET, SO_TYPE, (<span style="color:#458;font-weight:bold">void</span> <span style="color:#000;font-weight:bold">*</span>) <span style="color:#000;font-weight:bold">&amp;</span>ls[i].type,
+</span></span><span style="display:flex;"><span>                       <span style="color:#000;font-weight:bold">&amp;</span>olen)
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> NGX_OK;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="6-打开listening-socket">6. 打开listening socket</h2>
+<p>既然新的进程已经继承了老进程的socket，那么是不是不需要创建任何的socket了呢？所有老进程的socket是不是都要复用呢？</p>
+<p>这里要分三类listening来讨论：</p>
+<ol>
+<li>
+<p>新进程中新增的listening，需要在<code>ngx_open_listening_sockets</code>中新建socket</p>
+</li>
+<li>
+<p>新老进程都存在的listening，需要在<code>ngx_open_listening_sockets</code>中避免重新创建，然后在<code>ngx_init_cycle</code>中设置保留<code>ls[i].remain = 1</code>，后面可以直接复用socket</p>
+</li>
+<li>
+<p>老的进程存在的listening，但是新进程已经移除的listening，在<code>ngx_init_cycle</code>中标记<code>ls[i].remain = 0</code>，表示新进程不需要复用</p>
+</li>
+</ol>
+<p><code>ngx_open_listening_sockets</code>中，对于继承的socket，不需要再次创建。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_int_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_open_listening_sockets</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        ls <span style="color:#000;font-weight:bold">=</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.elts;
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> (i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> (ls[i].inherited) {
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">continue</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            s <span style="color:#000;font-weight:bold">=</span> ngx_socket(ls[i].sockaddr<span style="color:#000;font-weight:bold">-&gt;</span>sa_family, ls[i].type, <span style="color:#099">0</span>);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> NGX_OK;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>但是并不是所有继承的socket都需要保留复用，<code>ngx_init_cycle</code>会预先将所有从老进程中继承的<code>old_cycle-&gt;listening</code>标记为<code>ls[i].remain = 0</code>，默认不保留。</p>
+<p>除非在新进程的<code>cycle-&gt;listening</code>中能找到五元组相同的socket，才会保留复用。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_init_cycle</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>old_cycle)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">/* handle the listening sockets */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (old_cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts) {
+</span></span><span style="display:flex;"><span>        ls <span style="color:#000;font-weight:bold">=</span> old_cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.elts;
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> (i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> old_cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>            ls[i].remain <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        nls <span style="color:#000;font-weight:bold">=</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.elts;
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> (n <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; n <span style="color:#000;font-weight:bold">&lt;</span> cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; n<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">for</span> (i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> old_cycle<span style="color:#000;font-weight:bold">-&gt;</span>listening.nelts; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> (ls[i].remain) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">continue</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> (ngx_cmp_sockaddr(nls[n].sockaddr, nls[n].socklen,
+</span></span><span style="display:flex;"><span>                                     ls[i].sockaddr, ls[i].socklen, <span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">==</span> NGX_OK)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>                    ls[i].remain <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="优雅退出">优雅退出</h1>
+<h2 id="1-收到sigquit信号">1. 收到SIGQUIT信号</h2>
+<p>同样还是在<code>ngx_signal_handler</code>中，如果收到了<code>SIGQUIT</code>信号，设置<code>ngx_quit = 1</code>，然后在<code>ngx_worker_process_cycle</code>中处理。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_signal_handler</span>(<span style="color:#458;font-weight:bold">int</span> signo, siginfo_t <span style="color:#000;font-weight:bold">*</span>siginfo, <span style="color:#458;font-weight:bold">void</span> <span style="color:#000;font-weight:bold">*</span>ucontext)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">case</span> ngx_signal_value(NGX_SHUTDOWN_SIGNAL)<span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            ngx_quit <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>            action <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;, shutting down&#34;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">break</span>;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="2-关闭监听释放空闲连接">2. 关闭监听，释放空闲连接</h2>
+<p><code>ngx_worker_process_cycle</code>中，先设置一个shutdown timer，避免后续一直处于shutting down状态。然后关闭<code>cycle-&gt;listening</code>中的socket，保证worker进程不会再去处理新的连接。</p>
+<p>然后ngxin会释放所有空闲的连接。</p>
+<h2 id="3等待连接消亡">3.等待连接消亡</h2>
+<p>接下来就是等待所有连接全部关闭，如果存在长连接一直未断开，且<code>worker_shutdown_timeout</code>大于0，那么等待<code>worker_shutdown_timeout</code>时间后，所有连接都会被不优雅地强制关闭。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_worker_process_cycle</span>(ngx_cycle_t <span style="color:#000;font-weight:bold">*</span>cycle, <span style="color:#458;font-weight:bold">void</span> <span style="color:#000;font-weight:bold">*</span>data)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (ngx_quit) {
+</span></span><span style="display:flex;"><span>            ngx_quit <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">!</span>ngx_exiting) {
+</span></span><span style="display:flex;"><span>                ngx_exiting <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>                ngx_set_shutdown_timer(cycle);
+</span></span><span style="display:flex;"><span>                ngx_close_listening_sockets(cycle);
+</span></span><span style="display:flex;"><span>                ngx_close_idle_connections(cycle);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="深入思考">深入思考</h1>
+<h2 id="1新的进程为什么不创建新的listening-socket呢">1、新的进程为什么不创建新的listening socket呢？</h2>
+<p>我最初有个疑问，为什么新的进程不直接创建新的listening socket呢？ 通过将socket设置SO_REUSEPORT，新老进程同时监听端口，等新进程稳定运行后，老进程停止accept()，关闭listening socket，等连接消亡后优雅退出。这样不同样能够实现平滑升级吗？</p>
+<p>但是在详细了解了Linux TCP建立过程后，发现仅仅停止accept，还不足以优雅转移新的连接。因为在accept之前，TCP还有三次握手。</p>
+<p>Linux内核在TCP建立的过程中维护了两个队列：<code>SYN队列</code>和<code>Accept队列</code>。 在服务端收到客户端发起的SYN请求后，内核会将连接存储到<code>SYN队列</code>中。三次握手成功后，Linux内核会将连接从<code>SYN队列</code>中取出放入<code>Accept队列</code>，等待应用accept取出。</p>
+<p>如果老的进程直接关闭socket，但是<code>SYN队列</code>和<code>Accept队列</code>中还存在未处理的连接，势必会导致用户请求失败。也就是说，针对TCP连接，服务端需要把<code>SYN队列</code>和<code>Accept队列</code>中的连接全部处理完毕，并且这个过程中两个队列不能有新建的连接，才能保证用户无感知。这是新建socket所无法实现的。</p>
+<p>要真正做到无损接管连接，只有一种方案，那就是新的进程继承旧进程的套接字，而不新建套接字。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://fangzhou.blog">方舟</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/how-nginx-upgrades/">https://fangzhou.blog/post/how-nginx-upgrades/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/srs-memory-leak-caused-by-entry-cache/">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a></li>
+        
+        <li><a href="/post/how-srs-deals-with-rtp-packet-loss/">SRS如何处理RTP丢包</a></li>
+        
+        <li><a href="/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">RTP时间戳错误引起的视频花屏</a></li>
+        
+        <li><a href="/post/quick-sort-partition/">快速排序的partition</a></li>
+        
+        <li><a href="/post/2019-03-25-start/">Hello world</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "immortanjoe/blogtalk"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'G-3TE63Y62EWK', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://fangzhou.blog/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://fangzhou.blog">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/quick-sort-partition/" title="快速排序的partition">快速排序的partition</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://fangzhou.blog/categories/test/">test (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E7%AE%97%E6%B3%95/">算法 (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/">音视频 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://fangzhou.blog/tags/GB28181/">GB28181</a>
+    
+    <a href="https://fangzhou.blog/tags/PS%E6%B5%81/">PS流</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/">RTP丢包</a>
+    
+    <a href="https://fangzhou.blog/tags/SRS/">SRS</a>
+    
+    <a href="https://fangzhou.blog/tags/UDP/">UDP</a>
+    
+    <a href="https://fangzhou.blog/tags/memory-leak/">memory leak</a>
+    
+    <a href="https://fangzhou.blog/tags/partition/">partition</a>
+    
+    <a href="https://fangzhou.blog/tags/test/">test</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">内存泄漏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/">快排</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E6%8E%92%E5%BA%8F/">排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/">花屏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/">问题定位</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://fangzhou.blog/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
