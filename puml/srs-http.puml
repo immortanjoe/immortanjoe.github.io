@@ -21,7 +21,17 @@ SrsHttpStreamServer o.. SrsServer
 SrsHttpServer o-- SrsHttpStreamServer
 SrsHttpServer o.. SrsServer
 
+SrsResourceManager o-- SrsHttpConn
+
+SrsHttpConn o-- SrsHttpCorsMux
+SrsHttpConn o.. ISrsHttpServeMux
+
+SrsHttpCorsMux o.. ISrsHttpServeMux
+
+ISrsHttpServeMux <|-- SrsHttpServer
+
 SrsServer o-- SrsHttpServer
+SrsServer o-- SrsResourceManager
 
 SrsSource o.. SrsServer
 SrsSource o-- SrsPlayEdge

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>快速排序的partition | 方舟的博客</title>
+    <meta property="og:title" content="快速排序的partition - 方舟的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-03-26T10:55:28&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-03-26T10:55:28&#43;08:00'>
+        
+    <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
+    <meta name="description" content="快速排序的partition">
+        
+    <meta name="author" content="方舟">
+    <meta property="og:url" content="https://fangzhou.blog/post/quick-sort-partition/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://fangzhou.blog">
+                        方舟的博客
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://fangzhou.blog">首页</a>
+                    
+                    <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#数组中的第k个最大元素">数组中的第K个最大元素</a></li>
+    <li><a href="#快速排序的主元">快速排序的主元</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if (leftPos < 220) {
+                postToc.css({ "width": leftPos - 10, "margin-left": (0 - leftPos) })
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+
+        if ($("#TableOfContents").children().length < 1) {
+            $(".post-toc").remove();
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">快速排序的partition</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年3月26日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E7%AE%97%E6%B3%95'>算法</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <h1 id="前言">前言</h1>
+<p>快速排序是几个最基本的算法之一，但是作为一个算法渣渣，我并不觉得它是一个很简单的算法。我甚至花费了很多时间反复理解、记忆、实现，但所做的一切还只是停留在理解前人思想的阶段，这不免让人感到沮丧。</p>
+<h1 id="代码示例">代码示例</h1>
+<p>下面的快速排序是基于《算法导论》中的伪代码，通过递归实现的：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">func</span> <span style="color:#900;font-weight:bold">partition</span>(nums []<span style="color:#458;font-weight:bold">int</span>, l, r <span style="color:#458;font-weight:bold">int</span>) <span style="color:#458;font-weight:bold">int</span> {
+</span></span><span style="display:flex;"><span>    pivot <span style="color:#000;font-weight:bold">:=</span> l
+</span></span><span style="display:flex;"><span>    i, j <span style="color:#000;font-weight:bold">:=</span> l, r
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> i &lt; j {
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> i &lt; j <span style="color:#000;font-weight:bold">&amp;&amp;</span> nums[j] <span style="color:#000;font-weight:bold">&gt;=</span> nums[pivot] {
+</span></span><span style="display:flex;"><span>            j<span style="color:#000;font-weight:bold">--</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> i &lt; j <span style="color:#000;font-weight:bold">&amp;&amp;</span> nums[i] <span style="color:#000;font-weight:bold">&lt;=</span> nums[pivot] {
+</span></span><span style="display:flex;"><span>            i<span style="color:#000;font-weight:bold">++</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> i <span style="color:#000;font-weight:bold">!=</span> j {
+</span></span><span style="display:flex;"><span>            nums[i], nums[j] = nums[j], nums[i]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> pivot <span style="color:#000;font-weight:bold">!=</span> i {
+</span></span><span style="display:flex;"><span>        nums[i], nums[pivot] = nums[pivot], nums[i]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> i
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">func</span> <span style="color:#900;font-weight:bold">quickSort</span>(nums []<span style="color:#458;font-weight:bold">int</span>, l, r <span style="color:#458;font-weight:bold">int</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> l <span style="color:#000;font-weight:bold">&gt;=</span> r {
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    pivot <span style="color:#000;font-weight:bold">:=</span> <span style="color:#900;font-weight:bold">partition</span>(nums, l, r)
+</span></span><span style="display:flex;"><span>    <span style="color:#900;font-weight:bold">quickSort</span>(nums, l, pivot<span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#900;font-weight:bold">quickSort</span>(nums, pivot<span style="color:#000;font-weight:bold">+</span><span style="color:#099">1</span>, r)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>快速排序基于分治的思想，其核心在于：如何选取<code>pivot</code>划分数组 和 如何交换元素实现局部有序。《算法导论》中通过一个<code>partition</code>函数，将算法的核心代码提取出来，基于这个函数，能够快速实现不同版本的快速排序：中值<code>pivot</code>、随机<code>pivot</code>等。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">func</span> <span style="color:#900;font-weight:bold">midPartition</span>(nums []<span style="color:#458;font-weight:bold">int</span>, l, r <span style="color:#458;font-weight:bold">int</span>) <span style="color:#458;font-weight:bold">int</span> {
+</span></span><span style="display:flex;"><span>    mid <span style="color:#000;font-weight:bold">:=</span> l <span style="color:#000;font-weight:bold">+</span> (r <span style="color:#000;font-weight:bold">-</span> l) <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>
+</span></span><span style="display:flex;"><span>    nums[mid], nums[l] = nums[l], nums[mid]
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> <span style="color:#900;font-weight:bold">partition</span>(nums, l, r)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">func</span> <span style="color:#900;font-weight:bold">randomPartition</span>(nums []<span style="color:#458;font-weight:bold">int</span>, l, r <span style="color:#458;font-weight:bold">int</span>) <span style="color:#458;font-weight:bold">int</span> {
+</span></span><span style="display:flex;"><span>    randomNum, _ <span style="color:#000;font-weight:bold">:=</span> rand.<span style="color:#900;font-weight:bold">Int</span>(rand.Reader, big.<span style="color:#900;font-weight:bold">NewInt</span>(<span style="color:#0086b3">int64</span>(r<span style="color:#000;font-weight:bold">-</span>l)))
+</span></span><span style="display:flex;"><span>    i <span style="color:#000;font-weight:bold">:=</span> <span style="color:#0086b3">int</span>(randomNum.<span style="color:#900;font-weight:bold">Int64</span>()) <span style="color:#000;font-weight:bold">+</span> l
+</span></span><span style="display:flex;"><span>    nums[i], nums[l] = nums[l], nums[i]
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> <span style="color:#900;font-weight:bold">partition</span>(nums, l, r)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在上面<code>partition</code>的实现中，通过双指针分别和<code>pivot</code>比较、交换元素，最终确定了<code>pivot</code>的正确位置，和其两侧元素的相对位置。</p>
+<p>但是这个简单的实现中，如果右指针和左指针比较、移动的先后顺序发生变化，会产生意想不到的问题。甚至需要加一些特殊的判断逻辑才能解决，这会使得代码极为不优雅。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">func</span> <span style="color:#900;font-weight:bold">partition</span>(nums []<span style="color:#458;font-weight:bold">int</span>, l, r <span style="color:#458;font-weight:bold">int</span>) <span style="color:#458;font-weight:bold">int</span> {
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic">// 如果此时先移动左指针，然后再移动右指针，会出现某些场景下的异常。需要一些特殊的判断逻辑才能解决。
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">for</span> i &lt; j <span style="color:#000;font-weight:bold">&amp;&amp;</span> nums[i] <span style="color:#000;font-weight:bold">&lt;=</span> nums[pivot] {
+</span></span><span style="display:flex;"><span>            i<span style="color:#000;font-weight:bold">++</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">for</span> i &lt; j <span style="color:#000;font-weight:bold">&amp;&amp;</span> nums[j] <span style="color:#000;font-weight:bold">&gt;=</span> nums[pivot] {
+</span></span><span style="display:flex;"><span>            j<span style="color:#000;font-weight:bold">--</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="快排扩展">快排扩展</h1>
+<h2 id="数组中的第k个最大元素">数组中的第K个最大元素</h2>
+<p><a href="https://leetcode.cn/problems/kth-largest-element-in-an-array/">LeetCode: 215. Kth Largest Element in an Array</a></p>
+<p>这个题目，除了堆排序外，还能利用快排思想。这取决于我们到底有没有理解，每次<code>pivot</code>位置交换后，其实际意义是什么，除了让它两边元素移动到一个相对位置，它本身到底实现了什么意义呢？</p>
+<h2 id="快速排序的主元">快速排序的主元</h2>
+<p><a href="https://pintia.cn/problem-sets/994805260223102976/problems/994805278589960192">PAT: 1045 快速排序</a></p>
+<p>如果仅仅能够实现快速排序，并不能说明我们真正理解了快排的思想，而这个题目我觉得是一道教科书级别的题目，它能够帮助我们更深刻地理解<code>pivot</code>存在真正的意义。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://fangzhou.blog">方舟</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/quick-sort-partition/">https://fangzhou.blog/post/quick-sort-partition/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/2019-03-25-start/">Hello world</a></li>
+        
+        <li><a href="/about/">关于我</a></li>
+        
+        <li><a href="/archives/">归档</a></li>
+        
+        <li><a href="/search/">搜索</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%8E%92%E5%BA%8F'>排序</a></li>
+                
+                <li><a href='/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F'>快速排序</a></li>
+                
+                <li><a href='/tags/%E5%BF%AB%E6%8E%92'>快排</a></li>
+                
+                <li><a href='/tags/%E7%AE%97%E6%B3%95'>算法</a></li>
+                
+                <li><a href='/tags/partition'>partition</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "immortanjoe/blogtalk"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'G-3TE63Y62EWK', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://fangzhou.blog/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://fangzhou.blog">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/quick-sort-partition/" title="快速排序的partition">快速排序的partition</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://fangzhou.blog/categories/test/">test (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E7%AE%97%E6%B3%95/">算法 (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/">音视频 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://fangzhou.blog/tags/GB28181/">GB28181</a>
+    
+    <a href="https://fangzhou.blog/tags/PS%E6%B5%81/">PS流</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/">RTP丢包</a>
+    
+    <a href="https://fangzhou.blog/tags/SRS/">SRS</a>
+    
+    <a href="https://fangzhou.blog/tags/UDP/">UDP</a>
+    
+    <a href="https://fangzhou.blog/tags/memory-leak/">memory leak</a>
+    
+    <a href="https://fangzhou.blog/tags/partition/">partition</a>
+    
+    <a href="https://fangzhou.blog/tags/test/">test</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">内存泄漏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/">快排</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E6%8E%92%E5%BA%8F/">排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/">花屏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/">问题定位</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://fangzhou.blog/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
