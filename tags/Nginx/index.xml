@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nginx on 方舟的博客</title>
+    <link>https://fangzhou.blog/tags/Nginx/</link>
+    <description>Recent content in Nginx on 方舟的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 24 Jul 2022 11:33:58 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/Nginx/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Nginx DTLS补丁带来的启发</title>
+      <link>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</link>
+      <pubDate>Sun, 24 Jul 2022 11:33:58 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</guid>
+      <description>背景 搜索其他问题时，无意中发现了一个Nginx支持DTLS termination的补丁，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。 代码K 作者在nginxng</description>
+    </item>
+    
+    <item>
+      <title>Nginx如何实现热升级/平滑升级</title>
+      <link>https://fangzhou.blog/post/how-nginx-upgrades/</link>
+      <pubDate>Sat, 23 Jul 2022 15:17:57 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/how-nginx-upgrades/</guid>
+      <description>背景 最近看了Nginx升级相关的代码，虽然不能直接应用到业务逻辑相对复杂的服务中，但其中的思想还是可以借鉴的。 序列图 升级 1. 收到SIGUSR2 nginx进程收到SIGUSR2信号后，准备开始升级。 static void ngx_signal_handler(int signo, siginfo_t *siginfo, void *ucontext) { ... case ngx_signal_value(NGX_CHANGEBIN_SIGNAL): if (ngx_getppid() == ngx_parent || ngx_new_binary &amp;gt; 0) { action = &amp;#34;, ignoring&amp;#34;; ignore = 1; break; } ngx_change_binary = 1; action = &amp;#34;, changing binary&amp;#34;; break; ... } void ngx_master_process_cycle(ngx_cycle_t</description>
+    </item>
+    
+  </channel>
+</rss>

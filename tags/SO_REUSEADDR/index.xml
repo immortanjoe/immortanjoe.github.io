@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SO_REUSEADDR on 方舟的博客</title>
+    <link>https://fangzhou.blog/tags/SO_REUSEADDR/</link>
+    <description>Recent content in SO_REUSEADDR on 方舟的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 24 Jul 2022 15:48:45 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/SO_REUSEADDR/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SO_REUSEADDR和SO_REUSEPORT的对比</title>
+      <link>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</link>
+      <pubDate>Sun, 24 Jul 2022 15:48:45 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</guid>
+      <description>1. 多个socket绑定相同的IP和端口 Socket A: 192.168.1.1:80 Socket B: 192.168.1.1:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP Failed SO_REUSEADDR UDP Success SO_REUSEPORT TCP/UDP Success 2. 多个socket绑定不同的IP、相同的端口 Wildcard IP(0.0.0.0) Socket A: 0.0.0.0:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success Others Socket A: 192.168.1.1:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Success SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success</description>
+    </item>
+    
+  </channel>
+</rss>

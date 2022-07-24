@@ -2,25 +2,61 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://fangzhou.blog/categories/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/Linux/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/categories/Linux/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
     <loc>https://fangzhou.blog/post/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/SO_REUSEADDR/</loc>
     <lastmod>2022-07-24T15:48:45+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</loc>
     <lastmod>2022-07-24T15:48:45+08:00</lastmod>
   </url><url>
+    <loc>https://fangzhou.blog/tags/SO_REUSEPORT/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/socket/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
     <loc>https://fangzhou.blog/</loc>
     <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/%E7%BD%91%E7%BB%9C/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/DTLS/</loc>
+    <lastmod>2022-07-24T11:33:58+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/Nginx/</loc>
+    <lastmod>2022-07-24T11:33:58+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/categories/Nginx/</loc>
+    <lastmod>2022-07-24T11:33:58+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</loc>
     <lastmod>2022-07-24T11:33:58+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/categories/</loc>
-    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
-  </url><url>
-    <loc>https://fangzhou.blog/categories/Nginx/</loc>
-    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+    <loc>https://fangzhou.blog/tags/UDP/</loc>
+    <lastmod>2022-07-24T11:33:58+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/how-nginx-upgrades/</loc>
+    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/%E5%B9%B3%E6%BB%91%E5%8D%87%E7%BA%A7/</loc>
+    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/tags/%E7%83%AD%E5%8D%87%E7%BA%A7/</loc>
     <lastmod>2022-07-23T15:17:57+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/GB28181/</loc>
@@ -36,12 +72,6 @@
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/</loc>
-    <lastmod>2022-07-10T09:54:49+08:00</lastmod>
-  </url><url>
-    <loc>https://fangzhou.blog/tags/</loc>
-    <lastmod>2022-07-10T09:54:49+08:00</lastmod>
-  </url><url>
-    <loc>https://fangzhou.blog/tags/UDP/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/</loc>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>socket on 方舟的博客</title>
+    <link>https://fangzhou.blog/tags/socket/</link>
+    <description>Recent content in socket on 方舟的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 24 Jul 2022 15:48:45 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/socket/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SO_REUSEADDR和SO_REUSEPORT的对比</title>
+      <link>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</link>
+      <pubDate>Sun, 24 Jul 2022 15:48:45 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</guid>
+      <description>1. 多个socket绑定相同的IP和端口 Socket A: 192.168.1.1:80 Socket B: 192.168.1.1:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP Failed SO_REUSEADDR UDP Success SO_REUSEPORT TCP/UDP Success 2. 多个socket绑定不同的IP、相同的端口 Wildcard IP(0.0.0.0) Socket A: 0.0.0.0:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success Others Socket A: 192.168.1.1:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Success SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success</description>
+    </item>
+    
+    <item>
+      <title>Nginx DTLS补丁带来的启发</title>
+      <link>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</link>
+      <pubDate>Sun, 24 Jul 2022 11:33:58 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</guid>
+      <description>背景 搜索其他问题时，无意中发现了一个Nginx支持DTLS termination的补丁，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。 代码K 作者在nginxng</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>SO_REUSEPORT | 方舟的博客</title>
+    <meta property="og:title" content="SO_REUSEPORT - 方舟的博客">
+    <meta property="og:type" content="article">
+        
+        
+    <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
+    <meta name="description" content="SO_REUSEPORT">
+        
+    <meta name="author" content="方舟">
+    <meta property="og:url" content="https://fangzhou.blog/tags/SO_REUSEPORT/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <link rel="alternate" type="application/rss+xml" href="https://fangzhou.blog/tags/SO_REUSEPORT/index.xml" title="方舟的博客" />
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://fangzhou.blog">
+                        方舟的博客
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="" href="https://fangzhou.blog">首页</a>
+                    
+                    <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <h3 class="archive-title">
+        包含标签
+        <span class="keyword">SO_REUSEPORT</span>
+        的文章
+    </h3>
+    
+
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/">SO_REUSEADDR和SO_REUSEPORT的对比</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年7月24日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/Linux'>Linux</a>
+            
+        </div>
+        
+        <div class="post-content">
+            1. 多个socket绑定相同的IP和端口 Socket A: 192.168.1.1:80 Socket B: 192.168.1.1:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP Failed SO_REUSEADDR UDP Success SO_REUSEPORT TCP/UDP Success 2. 多个socket绑定不同的IP、相同的端口 Wildcard IP(0.0.0.0) Socket A: 0.0.0.0:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Failed SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success Others Socket A: 192.168.1.1:80 Socket B: 192.168.1.2:80 Socket Option Protocol bind() Result None TCP/UDP Success SO_REUSEADDR TCP/UDP Success SO_REUSEPORT TCP/UDP Success……
+            <p class="readmore"><a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/">阅读全文</a></p>
+        </div>
+    </article>
+    
+
+    
+
+
+
+
+
+</div>
+
+                    <footer id="footer">
+    
+    <br />
+    
+</footer>
+
+
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'G-3TE63Y62EWK', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://fangzhou.blog/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://fangzhou.blog">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/" title="SO_REUSEADDR和SO_REUSEPORT的对比">SO_REUSEADDR和SO_REUSEPORT的对比</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/" title="Nginx DTLS补丁带来的启发">Nginx DTLS补丁带来的启发</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/quick-sort-partition/" title="快速排序的partition">快速排序的partition</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://fangzhou.blog/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/Nginx/">Nginx (2)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/SRS/">SRS (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E6%B5%81%E5%AA%92%E4%BD%93%E6%9C%8D%E5%8A%A1/">流媒体服务 (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E7%AE%97%E6%B3%95/">算法 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://fangzhou.blog/tags/DTLS/">DTLS</a>
+    
+    <a href="https://fangzhou.blog/tags/GB28181/">GB28181</a>
+    
+    <a href="https://fangzhou.blog/tags/Linux/">Linux</a>
+    
+    <a href="https://fangzhou.blog/tags/Nginx/">Nginx</a>
+    
+    <a href="https://fangzhou.blog/tags/PS%E6%B5%81/">PS流</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/">RTP丢包</a>
+    
+    <a href="https://fangzhou.blog/tags/SO_REUSEADDR/">SO_REUSEADDR</a>
+    
+    <a href="https://fangzhou.blog/tags/SO_REUSEPORT/">SO_REUSEPORT</a>
+    
+    <a href="https://fangzhou.blog/tags/SRS/">SRS</a>
+    
+    <a href="https://fangzhou.blog/tags/UDP/">UDP</a>
+    
+    <a href="https://fangzhou.blog/tags/memory-leak/">memory leak</a>
+    
+    <a href="https://fangzhou.blog/tags/partition/">partition</a>
+    
+    <a href="https://fangzhou.blog/tags/socket/">socket</a>
+    
+    <a href="https://fangzhou.blog/tags/test/">test</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">内存泄漏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%B9%B3%E6%BB%91%E5%8D%87%E7%BA%A7/">平滑升级</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/">快排</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E6%8E%92%E5%BA%8F/">排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%83%AD%E5%8D%87%E7%BA%A7/">热升级</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/">花屏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/">问题定位</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://fangzhou.blog/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
