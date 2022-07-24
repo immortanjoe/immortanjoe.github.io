@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>音视频 on 方舟的博客</title>
-    <link>https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/</link>
-    <description>Recent content in 音视频 on 方舟的博客</description>
+    <title>SRS on 方舟的博客</title>
+    <link>https://fangzhou.blog/categories/SRS/</link>
+    <description>Recent content in SRS on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 10 Jul 2022 09:54:49 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 10 Jul 2022 09:54:49 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/categories/SRS/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>SrsHttpMuxEntry缓存引起的SRS内存泄漏</title>
       <link>https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/</link>

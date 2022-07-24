@@ -2,17 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://fangzhou.blog/post/how-nginx-upgrades/</loc>
-    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
-  </url><url>
     <loc>https://fangzhou.blog/post/</loc>
-    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/</loc>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/</loc>
-    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+    <lastmod>2022-07-24T15:48:45+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/categories/</loc>
-    <lastmod>2022-07-10T09:54:49+08:00</lastmod>
+    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/categories/Nginx/</loc>
+    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/post/how-nginx-upgrades/</loc>
+    <lastmod>2022-07-23T15:17:57+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/GB28181/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
@@ -21,6 +27,9 @@
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/SRS/</loc>
+    <lastmod>2022-07-10T09:54:49+08:00</lastmod>
+  </url><url>
+    <loc>https://fangzhou.blog/categories/SRS/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/</loc>
@@ -35,10 +44,10 @@
     <loc>https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/</loc>
+    <loc>https://fangzhou.blog/categories/%E6%B5%81%E5%AA%92%E4%BD%93%E6%9C%8D%E5%8A%A1/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
-    <loc>https://fangzhou.blog/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/</loc>
+    <loc>https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/</loc>
     <lastmod>2022-07-10T09:54:49+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/PS%E6%B5%81/</loc>
@@ -81,9 +90,6 @@
     <lastmod>2019-03-25T19:34:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/tags/test/</loc>
-    <lastmod>2019-03-25T19:34:22+08:00</lastmod>
-  </url><url>
-    <loc>https://fangzhou.blog/categories/test/</loc>
     <lastmod>2019-03-25T19:34:22+08:00</lastmod>
   </url><url>
     <loc>https://fangzhou.blog/about/</loc>
