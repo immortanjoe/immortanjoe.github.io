@@ -102,7 +102,7 @@
         <div class="post-content">
             <h1 id="背景">背景</h1>
 <p>搜索其他问题时，无意中发现了一个Nginx支持<a href="%60http://nginx.org/patches/dtls%60">DTLS termination的补丁</a>，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。</p>
-<h1 id="代码k">代码K</h1>
+<h1 id="代码">代码</h1>
 <p>作者在nginx<code>ngx_ssl_handshake</code>中，新增了一个<code>ngx_event_udp_accept</code>处理逻辑。</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (c<span style="color:#000;font-weight:bold">-&gt;</span>type <span style="color:#000;font-weight:bold">==</span> SOCK_DGRAM <span style="color:#000;font-weight:bold">&amp;&amp;</span> <span style="color:#000;font-weight:bold">!</span>c<span style="color:#000;font-weight:bold">-&gt;</span>ssl<span style="color:#000;font-weight:bold">-&gt;</span>client
 </span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">&amp;&amp;</span> <span style="color:#000;font-weight:bold">!</span>c<span style="color:#000;font-weight:bold">-&gt;</span>ssl<span style="color:#000;font-weight:bold">-&gt;</span>dtls_cookie_accepted)
