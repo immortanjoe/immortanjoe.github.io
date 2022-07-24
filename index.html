@@ -92,6 +92,22 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/" title="Nginx DTLS补丁带来的启发">Nginx DTLS补丁带来的启发</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年7月24日
+        </date>
+        
+        <div class="post-content">
+            背景 搜索其他问题时，无意中发现了一个Nginx支持DTLS termination的补丁，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。 代码 作者在nginxngx……
+        </div>
+        <p class="readmore"><a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
             </h1>
         </header>
@@ -283,6 +299,10 @@ if (!doNotTrack) {
     
     <li>
         <a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/" title="SO_REUSEADDR和SO_REUSEPORT的对比">SO_REUSEADDR和SO_REUSEPORT的对比</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/" title="Nginx DTLS补丁带来的启发">Nginx DTLS补丁带来的启发</a>
     </li>
     
     <li>

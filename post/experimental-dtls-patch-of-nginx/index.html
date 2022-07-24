@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Nginx DTLS补丁带来的启发 | 方舟的博客</title>
+    <meta property="og:title" content="Nginx DTLS补丁带来的启发 - 方舟的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-07-24T11:33:58&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-07-24T11:33:58&#43;08:00'>
+        
+    <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
+    <meta name="description" content="Nginx DTLS补丁带来的启发">
+        
+    <meta name="author" content="方舟">
+    <meta property="og:url" content="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://fangzhou.blog">
+                        方舟的博客
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://fangzhou.blog">首页</a>
+                    
+                    <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">Nginx DTLS补丁带来的启发</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年7月24日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h1 id="背景">背景</h1>
+<p>搜索其他问题时，无意中发现了一个Nginx支持<a href="%60http://nginx.org/patches/dtls%60">DTLS termination的补丁</a>，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。</p>
+<h1 id="代码">代码</h1>
+<p>作者在nginx<code>ngx_ssl_handshake</code>中，新增了一个<code>ngx_event_udp_accept</code>处理逻辑。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (c<span style="color:#000;font-weight:bold">-&gt;</span>type <span style="color:#000;font-weight:bold">==</span> SOCK_DGRAM <span style="color:#000;font-weight:bold">&amp;&amp;</span> <span style="color:#000;font-weight:bold">!</span>c<span style="color:#000;font-weight:bold">-&gt;</span>ssl<span style="color:#000;font-weight:bold">-&gt;</span>client
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">&amp;&amp;</span> <span style="color:#000;font-weight:bold">!</span>c<span style="color:#000;font-weight:bold">-&gt;</span>ssl<span style="color:#000;font-weight:bold">-&gt;</span>dtls_cookie_accepted)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        rc <span style="color:#000;font-weight:bold">=</span> ngx_dtls_handshake(c);
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> (rc <span style="color:#000;font-weight:bold">!=</span> NGX_OK) {
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> rc;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>在<code>ngx_event_udp_accept</code>中，又新建了一个UDP socket，并设置<code>SO_REUSEADDR</code>(对于UDP来说设置<code>SO_REUSEADDR</code>就够了，详见<a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/">《SO_REUSEADDR和SO_REUSEPORT的对比》</a>)，然后同样绑定了当前监听的IP和端口。</p>
+<p>接下来<code>connect</code>对端（也就是客户端）的IP和端口，确定唯一的socket五元组。 对于<code>UDP</code>来说，一般不需要<code>connect</code>操作，创建socket之后可以直接<code>sendto</code>，在<code>sendto</code>的参数中设置目的地址和端口。但是如果调用了<code>connect</code>，那么就限定了这个socket的使用范围： 只允许从<code>connect</code>指定的地址上获得数据包和向这个指定的地址上发送数据包，否则会返回IllegalArgumentException。</p>
+<p>然后将新创建的socket fd赋值给<code>c-&gt;fd</code>，connection不再被共享<code>c-&gt;shared = 0</code>。相当于将客户端的连接切换到新的socket上，实现每个客户端使用唯一的socket，便于后续nginx和每个客户端进行独立的TLS握手。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_int_t
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">ngx_event_udp_accept</span>(ngx_connection_t <span style="color:#000;font-weight:bold">*</span>c)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    fd <span style="color:#000;font-weight:bold">=</span> ngx_socket(c<span style="color:#000;font-weight:bold">-&gt;</span>listening<span style="color:#000;font-weight:bold">-&gt;</span>sockaddr<span style="color:#000;font-weight:bold">-&gt;</span>sa_family, SOCK_DGRAM, <span style="color:#099">0</span>);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (ngx_nonblocking(fd) <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    rc <span style="color:#000;font-weight:bold">=</span> setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (<span style="color:#458;font-weight:bold">char</span> <span style="color:#000;font-weight:bold">*</span>) <span style="color:#000;font-weight:bold">&amp;</span>on, <span style="color:#000;font-weight:bold">sizeof</span>(<span style="color:#458;font-weight:bold">int</span>));
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    rc <span style="color:#000;font-weight:bold">=</span> bind(fd, c<span style="color:#000;font-weight:bold">-&gt;</span>listening<span style="color:#000;font-weight:bold">-&gt;</span>sockaddr, c<span style="color:#000;font-weight:bold">-&gt;</span>listening<span style="color:#000;font-weight:bold">-&gt;</span>socklen);
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (connect(fd, c<span style="color:#000;font-weight:bold">-&gt;</span>sockaddr, c<span style="color:#000;font-weight:bold">-&gt;</span>socklen) <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    c<span style="color:#000;font-weight:bold">-&gt;</span>fd <span style="color:#000;font-weight:bold">=</span> fd;
+</span></span><span style="display:flex;"><span>    c<span style="color:#000;font-weight:bold">-&gt;</span>shared <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>;
+</span></span><span style="display:flex;"><span>    c<span style="color:#000;font-weight:bold">-&gt;</span>recv <span style="color:#000;font-weight:bold">=</span> ngx_udp_recv;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (ngx_add_conn <span style="color:#000;font-weight:bold">&amp;&amp;</span> (ngx_event_flags <span style="color:#000;font-weight:bold">&amp;</span> NGX_USE_EPOLL_EVENT) <span style="color:#000;font-weight:bold">==</span> <span style="color:#099">0</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>     }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> NGX_OK;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#900;font-weight:bold">failed</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> (ngx_close_socket(fd) <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    c<span style="color:#000;font-weight:bold">-&gt;</span>fd <span style="color:#000;font-weight:bold">=</span> (ngx_socket_t) <span style="color:#000;font-weight:bold">-</span><span style="color:#099">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> NGX_ERROR;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="缺陷">缺陷</h1>
+<p>因为之前没有见过类似的用法，第一次看到觉得非常有启发性：通过不同的五元组，将每个客户端的socket分离，实现了类似TCP连接的效果。但是这个方案其实存在着较大的局限性，正如作者所说：</p>
+<blockquote>
+<p>There is a race between accepting first packet and creating a per-client socket used to maintain a session.  When using multiple workers, some packets may be delivered to worker other than that which started a session resulting in extra delay (DTLS client is expected to retry after a timeout).</p>
+</blockquote>
+<ol>
+<li>在接收到第一个包，新建socket并<code>connect</code>的过程中，持续会接收到新的UDP包。很可能新的socket没有<code>connect</code>完成，老的socket缓存中已经收到了部分数据。</li>
+<li>Nginx是多进程部署模式，多个进程复用相同的listening socket，同一个客户端的UDP包很可能会被不同进程的socket读取，这会导致TLS握手丢失、握手失败。</li>
+</ol>
+<h1 id="解决方案">解决方案</h1>
+<p>对于第一个问题，如果是单进程程序，是可以解决的：在确定新的socket五元组后，检查缓存中是否已经读到了数据，如果读到了则append到新的fd上。</p>
+<p>最致命的是第二个问题，目前还无法限制一个客户端的UDP报文只被<code>recvfrom</code>到nginx的一个worker上。这可能就是这个patch从2018年到现在都没合入的原因吧。</p>
+<p>好消息是有了<code>QUIC</code>协议后，没有必要像这样实现DTLS了。</p>
+<h1 id="深入思考">深入思考</h1>
+<p>这个用法对于单进程的程序具有很好的借鉴意义，比如：对于流媒体流UDP的长连接，可以实现每个客户端socket分离，便于fd的迁移；对于UDP程序的热升级，老进程关闭listen socket后，依然可以保持已经建立的连接不受影响。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://fangzhou.blog">方舟</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/">https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/how-nginx-upgrades/">Nginx如何实现热升级/平滑升级</a></li>
+        
+        <li><a href="/post/srs-memory-leak-caused-by-entry-cache/">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a></li>
+        
+        <li><a href="/post/how-srs-deals-with-rtp-packet-loss/">SRS如何处理RTP丢包</a></li>
+        
+        <li><a href="/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">RTP时间戳错误引起的视频花屏</a></li>
+        
+        <li><a href="/post/quick-sort-partition/">快速排序的partition</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "immortanjoe/blogtalk"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'G-3TE63Y62EWK', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://fangzhou.blog/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://fangzhou.blog">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/" title="SO_REUSEADDR和SO_REUSEPORT的对比">SO_REUSEADDR和SO_REUSEPORT的对比</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/" title="Nginx DTLS补丁带来的启发">Nginx DTLS补丁带来的启发</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/quick-sort-partition/" title="快速排序的partition">快速排序的partition</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/2019-03-25-start/" title="Hello world">Hello world</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://fangzhou.blog/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/SRS/">SRS (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E6%B5%81%E5%AA%92%E4%BD%93%E6%9C%8D%E5%8A%A1/">流媒体服务 (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E7%AE%97%E6%B3%95/">算法 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://fangzhou.blog/tags/GB28181/">GB28181</a>
+    
+    <a href="https://fangzhou.blog/tags/PS%E6%B5%81/">PS流</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/">RTP丢包</a>
+    
+    <a href="https://fangzhou.blog/tags/SRS/">SRS</a>
+    
+    <a href="https://fangzhou.blog/tags/UDP/">UDP</a>
+    
+    <a href="https://fangzhou.blog/tags/memory-leak/">memory leak</a>
+    
+    <a href="https://fangzhou.blog/tags/partition/">partition</a>
+    
+    <a href="https://fangzhou.blog/tags/test/">test</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">内存泄漏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/">快排</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E6%8E%92%E5%BA%8F/">排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/">花屏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/">问题定位</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://fangzhou.blog/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

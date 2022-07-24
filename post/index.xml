@@ -17,6 +17,15 @@
     </item>
     
     <item>
+      <title>Nginx DTLS补丁带来的启发</title>
+      <link>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</link>
+      <pubDate>Sun, 24 Jul 2022 11:33:58 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/</guid>
+      <description>背景 搜索其他问题时，无意中发现了一个Nginx支持DTLS termination的补丁，觉得这个代码的实现很有启发性。因为UDP本身是无连接的，而DTLS服务端却需要和每个客户端完成四次TLS握手，这就需要服务端为每个客户端维护一个类似TCP的连接模型。 代码 作者在nginxngx</description>
+    </item>
+    
+    <item>
       <title>Nginx如何实现热升级/平滑升级</title>
       <link>https://fangzhou.blog/post/how-nginx-upgrades/</link>
       <pubDate>Sat, 23 Jul 2022 15:17:57 +0800</pubDate>
