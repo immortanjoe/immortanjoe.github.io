@@ -112,7 +112,7 @@
 </span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> rc;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span></code></pre></div><p>在<code>ngx_event_udp_accept</code>中，又新建了一个UDP socket，并设置<code>SO_REUSEADDR</code>(对于UDP来说设置<code>SO_REUSEADDR</code>就够了，详见<a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/">《SO_REUSEADDR和SO_REUSEPORT的对比》</a>)，然后同样绑定了当前监听的IP和端口。</p>
+</span></span></code></pre></div><p>在<code>ngx_event_udp_accept</code>中，又新建了一个UDP socket，并设置<code>SO_REUSEADDR</code>，然后同样绑定了当前监听的IP和端口。</p>
 <p>接下来<code>connect</code>对端（也就是客户端）的IP和端口，确定唯一的socket五元组。 对于<code>UDP</code>来说，一般不需要<code>connect</code>操作，创建socket之后可以直接<code>sendto</code>，在<code>sendto</code>的参数中设置目的地址和端口。但是如果调用了<code>connect</code>，那么就限定了这个socket的使用范围： 只允许从<code>connect</code>指定的地址上获得数据包和向这个指定的地址上发送数据包，否则会返回IllegalArgumentException。</p>
 <p>然后将新创建的socket fd赋值给<code>c-&gt;fd</code>，connection不再被共享<code>c-&gt;shared = 0</code>。相当于将客户端的连接切换到新的socket上，实现每个客户端使用唯一的socket，便于后续nginx和每个客户端进行独立的TLS握手。</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>ngx_int_t
@@ -160,12 +160,11 @@
 </blockquote>
 <ol>
 <li>在接收到第一个包，新建socket并<code>connect</code>的过程中，持续会接收到新的UDP包。很可能新的socket没有<code>connect</code>完成，老的socket缓存中已经收到了部分数据。</li>
-<li>Nginx是多进程部署模式，多个进程复用相同的listening socket，同一个客户端的UDP包很可能会被不同进程的socket读取，这会导致TLS握手丢失、握手失败。</li>
+<li>Nginx是多进程部署模式，在仅设置<code>SO_REUSEADDR</code>参数的情况下，多个进程监听相同的IP和端口，实际上是多个客户端竞争的关系，同一个客户端的UDP包很可能会被不同进程的socket读取，这会导致TLS握手丢失、握手失败。</li>
 </ol>
 <h1 id="解决方案">解决方案</h1>
 <p>对于第一个问题，如果是单进程程序，是可以解决的：在确定新的socket五元组后，检查缓存中是否已经读到了数据，如果读到了则append到新的fd上。</p>
-<p>最致命的是第二个问题，目前还无法限制一个客户端的UDP报文只被<code>recvfrom</code>到nginx的一个worker上。这可能就是这个patch从2018年到现在都没合入的原因吧。</p>
-<p>好消息是有了<code>QUIC</code>协议后，没有必要像这样实现DTLS了。</p>
+<p>对于第二个问题，通过在socket上启用<code>SO_REUSEPORT</code>就可以解决。而在作者的代码中，只有对<code>FreeBSD</code>才启用了<code>SO_REUSEPORT</code>，可能是考虑Linux版本兼容问题吧，毕竟Linux是在3.9以后才支持<code>SO_REUSEPORT</code>特性的。</p>
 <h1 id="深入思考">深入思考</h1>
 <p>这个用法对于单进程的程序具有很好的借鉴意义，比如：对于流媒体流UDP的长连接，可以实现每个客户端socket分离，便于fd的迁移；对于UDP程序的热升级，老进程关闭listen socket后，依然可以保持已经建立的连接不受影响。</p>
 
