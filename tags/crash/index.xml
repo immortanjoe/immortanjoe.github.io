@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>crash on 方舟的博客</title>
+    <link>https://fangzhou.blog/tags/crash/</link>
+    <description>Recent content in crash on 方舟的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 29 Sep 2022 22:51:27 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/crash/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;父类vptr偏移地址计算错误导致的crash</title>
+      <link>https://fangzhou.blog/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/</link>
+      <pubDate>Thu, 29 Sep 2022 22:51:27 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/</guid>
+      <description>问题现象 对某一个SrsServer类添加一个public ClassA继承后，程序再次运行就会crash。（关键代码已经做混淆处理） class SrsServer : virtual public ISrsReloadHandler, virtual public ISrsSourceHandler, virtual public ISrsResourceManager, virtual public ISrsProcessSampleObjectoroutineHandler, virtual public ISrsHourGlass, public ClassA { public: SrsServer() {} virtual ~SrsServer(){} }; class ClassA : public class BaseClassA { ... } class BaseClassA { ... public: void print(); ... } 问题分析 错乱的父类函数调用 通过gdb调试coredump文件</description>
+    </item>
+    
+  </channel>
+</rss>
