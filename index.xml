@@ -98,6 +98,15 @@
     </item>
     
     <item>
+      <title></title>
+      <link>https://fangzhou.blog/post/rtcp/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://fangzhou.blog/post/rtcp/</guid>
+      <description>title=&amp;lsquo;RTCP协议&amp;rsquo; tags=[&amp;ldquo;WebRTC&amp;rdquo;, &amp;ldquo;RTCP&amp;rdquo;, &amp;ldquo;RTP&amp;rdquo;, “RTPFB”, &amp;ldquo;PSFB&amp;rdquo;] categories=[&amp;ldquo;流媒体&amp;rdquo;, &amp;ldquo;WebRTC&amp;rdquo;] date=&amp;ldquo;2022-08-60T20:32:14+08:00&amp;rdquo; toc=false draft=false RTCP包的类型 名称 PT（Payload Type） 备注 SR（Sender Report） 200 发送端报告。发送端将自己的信息以及自己接收数据的</description>
+    </item>
+    
+    <item>
       <title>归档</title>
       <link>https://fangzhou.blog/archives/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

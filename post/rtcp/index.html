@@ -9,20 +9,16 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Hello world | 方舟的博客</title>
-    <meta property="og:title" content="Hello world - 方舟的博客">
+    <title> | 方舟的博客</title>
+    <meta property="og:title" content=" - 方舟的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2019-03-25T19:34:22&#43;08:00'>
-        
-        
-    <meta property="article:modified_time" content='2019-03-25T19:34:22&#43;08:00'>
         
     <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
-    <meta name="description" content="Hello world">
+    <meta name="description" content="">
         
     <meta name="author" content="方舟">
-    <meta property="og:url" content="https://fangzhou.blog/post/2019-03-25-start/">
+    <meta property="og:url" content="https://fangzhou.blog/post/rtcp/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -76,110 +72,13 @@
                 <div class="col-8" id="main">
                     
 <div class="res-cons">
-    <style type="text/css">
-    .post-toc {
-        position: fixed;
-        width: 200px;
-        margin-left: -210px;
-        padding: 5px 10px;
-        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
-        font-size: 12px;
-        border: 1px solid rgba(0, 0, 0, .07);
-        border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0.98);
-        background-clip: padding-box;
-        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        word-wrap: break-word;
-        white-space: nowrap;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        z-index: 999;
-        cursor: pointer;
-        max-height: 70%;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .post-toc .post-toc-title {
-        width: 100%;
-        margin: 0 auto;
-        font-size: 20px;
-        font-weight: 400;
-        text-transform: uppercase;
-        text-align: center;
-    }
-
-    .post-toc .post-toc-content {
-        font-size: 15px;
-    }
-
-    .post-toc .post-toc-content>nav>ul {
-        margin: 10px 0;
-    }
-
-    .post-toc .post-toc-content ul {
-        padding-left: 20px;
-        list-style: square;
-        margin: 0.5em;
-        line-height: 1.8em;
-    }
-
-    .post-toc .post-toc-content ul ul {
-        padding-left: 15px;
-        display: none;
-    }
-
-    @media print,
-    screen and (max-width:1057px) {
-        .post-toc {
-            display: none;
-        }
-    }
-</style>
-<div class="post-toc" style="position: absolute; top: 188px;">
-    <h2 class="post-toc-title">文章目录</h2>
-    <div class="post-toc-content">
-        <nav id="TableOfContents"></nav>
-    </div>
-</div>
-<script type="text/javascript">
-    $(document).ready(function () {
-        var postToc = $(".post-toc");
-        if (postToc.length) {
-            var leftPos = $("#main").offset().left;
-            if (leftPos < 220) {
-                postToc.css({ "width": leftPos - 10, "margin-left": (0 - leftPos) })
-            }
-
-            var t = postToc.offset().top - 20,
-                a = {
-                    start: {
-                        position: "absolute",
-                        top: t
-                    },
-                    process: {
-                        position: "fixed",
-                        top: 20
-                    },
-                };
-            $(window).scroll(function () {
-                var e = $(window).scrollTop();
-                e < t ? postToc.css(a.start) : postToc.css(a.process)
-            })
-        }
-
-        if ($("#TableOfContents").children().length < 1) {
-            $(".post-toc").remove();
-        }
-    })
-</script>
+    
     <article class="post">
         <header>
-            <h1 class="post-title">Hello world</h1>
+            <h1 class="post-title"></h1>
         </header>
         <date class="post-meta meta-date">
-            2019年3月25日
+            1年1月1日
         </date>
         
         
@@ -189,14 +88,229 @@
         </div>
         
         
-        <div class="clear" style="display: none">
-            <div class="toc-article">
-                <div class="toc-title">文章目录</div>
-            </div>
-        </div>
-        
         <div class="post-content">
-            <p>We are at the crossroads of destiny.</p>
+            <p>title=&lsquo;RTCP协议&rsquo;
+tags=[&ldquo;WebRTC&rdquo;, &ldquo;RTCP&rdquo;, &ldquo;RTP&rdquo;, “RTPFB”, &ldquo;PSFB&rdquo;]
+categories=[&ldquo;流媒体&rdquo;, &ldquo;WebRTC&rdquo;]
+date=&ldquo;2022-08-60T20:32:14+08:00&rdquo;
+toc=false
+draft=false</p>
+<h2 id="rtcp包的类型">RTCP包的类型</h2>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>PT（Payload Type）</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SR（Sender Report）</td>
+<td>200</td>
+<td>发送端报告。发送端将自己的信息以及自己接收数据的统计信息报告给对端。</td>
+</tr>
+<tr>
+<td>RR（Receiver Report）</td>
+<td>201</td>
+<td>接收端报告。接收端将自己接收数据的统计信息报告给对端。</td>
+</tr>
+<tr>
+<td>SDES（Source Description Items）</td>
+<td>202</td>
+<td>源信息描述</td>
+</tr>
+<tr>
+<td>BYE</td>
+<td>203</td>
+<td>结束传输</td>
+</tr>
+<tr>
+<td>APP</td>
+<td>204</td>
+<td>特定应用</td>
+</tr>
+<tr>
+<td>RTPFB（Transport layer - RTP Feedback）</td>
+<td>205</td>
+<td>传输层反馈消息</td>
+</tr>
+<tr>
+<td>PSFB（Payload-specific FB messages）</td>
+<td>206</td>
+<td>负载反馈消息</td>
+</tr>
+</tbody>
+</table>
+<p>详见：<a href="https://www.rfc-editor.org/rfc/rfc3550.html">rfc3550</a></p>
+<h3 id="sr">SR</h3>
+<p>传输流媒体数据时，发送端和接收端的角色是相对的，尤其是WebRTC的场景下，数据的发送端往往同时也是数据的接收端。所以发送端发送的SR包中，不仅包含发送端自己的信息，还包含发送端作为接收端接收数据的信息：</p>
+<ul>
+<li>发送端SSRC</li>
+<li>NTP时间戳，结合来自接收报告中返回的时间戳，可以用于估计往返于接收端RTT</li>
+<li>RTP时间戳</li>
+<li>RTP包发送数量，两个SR包之间发送的RTP包的数量</li>
+<li>Payload数据发送字节数，发送的RTP payload数据的大小，不包括RTP头和Padding</li>
+<li>接收端SSRC</li>
+<li>发送端接收数据包的丢包率</li>
+<li>发送端接收数据包的丢包数量</li>
+<li>发送端接收数据包的时间抖动</li>
+</ul>
+<h3 id="rr">RR</h3>
+<p>如果一个用户只接收数据，不需要发送数据，那么作为一个纯粹的接收端，他只需要发送RR包，将自己接收数据的统计信息报告给对端。所以RR包中不包含发送端的信息：</p>
+<ul>
+<li>发送端SSRC</li>
+<li>接收端SSRC</li>
+<li>接收端接收数据包的丢包率</li>
+<li>接收端接收数据包的丢包数量</li>
+<li>接收端接收数据包的时间抖动</li>
+</ul>
+<h3 id="sdes">SDES</h3>
+<p>SDES包用于描述SSRC的信息，包括：CNAME, NAME, EMAIL, PHONE, LOC,TOOL, NOTE, PRIV。其中，CNAME比较特殊，每个SDES包都必须包含CNAME信息，而且CNAME 必须与其他会话的 CNAME 不同，可以用于标识会话。比如，在程序重启时，SSRC会发生变化，可以通过CNAME信息关联到原会话；CNAME还可以可以用于关联来自不同RTP会话的参与者的多个媒体流，例如：关联需要同步的语音和视频。</p>
+<p>WebRTC 在会话协商时，会为每个 SSRC 设置 CNAME，然后通过SDES包确认 CNAME 与 SSRC 的关系。</p>
+<p>详见<a href="https://datatracker.ietf.org/doc/html/rfc1889">rfc1889</a></p>
+<h3 id="rtpfb">RTPFB</h3>
+<p>RTPFB为传输层反馈包，用于RTP包的传输控制，FMT标识了具体的子类型。</p>
+<h4 id="消息子类型">消息子类型</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>FMT（Feedback Message Type）</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generic NACK（Generic negative acknowledgement）</td>
+<td>1</td>
+<td>用于传输NACK包和RTX包，<a href="https://www.iana.org/go/rfc4585">RFC4585</a></td>
+</tr>
+<tr>
+<td>TMMBR（Temporary Maximum Media Stream Bit Rate Request）</td>
+<td>3</td>
+<td>临时最大码率设置请求，WebRTC中废弃，<a href="https://www.iana.org/go/rfc5104">RFC5104</a></td>
+</tr>
+<tr>
+<td>TMMBNTMMBR（Temporary Maximum Media Stream Bit Rate Notification）</td>
+<td>4</td>
+<td>临时最大码率设置响应，WebRTC中废弃，<a href="https://www.iana.org/go/rfc5104">RFC5104</a></td>
+</tr>
+<tr>
+<td>RTCP-SR-REQ（ RTCP Rapid Resynchronisation Request）</td>
+<td>5</td>
+<td><a href="https://www.iana.org/go/rfc6051">RFC6051</a></td>
+</tr>
+<tr>
+<td>RAMS（Rapid Acquisition of Multicast Sessions）</td>
+<td>6</td>
+<td><a href="https://www.iana.org/go/rfc6285">RFC6285</a></td>
+</tr>
+<tr>
+<td>TLLEI（ Transport-Layer Third-Party Loss Early Indication）</td>
+<td>7</td>
+<td><a href="https://www.iana.org/go/rfc6642">RFC6642</a></td>
+</tr>
+<tr>
+<td>RTCP-ECN-FB（ RTCP ECN Feedback）</td>
+<td>8</td>
+<td><a href="https://www.iana.org/go/rfc6679">RFC6679</a></td>
+</tr>
+<tr>
+<td>PAUSE-RESUME（Media Pause/Resume）</td>
+<td>9</td>
+<td><a href="https://www.iana.org/go/rfc7728">RFC7728</a></td>
+</tr>
+<tr>
+<td>DBI（Delay Budget Information (DBI)）</td>
+<td>10</td>
+<td><a href="https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=1404">3GPP TS 26.114 v16.3.0</a><!-- raw HTML omitted --><a href="https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml#Ozgur_Oyman">Ozgur_Oyman</a></td>
+</tr>
+<tr>
+<td>CCFB（RTP Congestion Control Feedback）</td>
+<td>11</td>
+<td><a href="https://www.iana.org/go/rfc8888">RFC8888</a></td>
+</tr>
+<tr>
+<td>Transport-CC</td>
+<td>15</td>
+<td>Transport-wide Congestion Control，WebRTC中的拥塞控制算法（Sendside BWE），<a href="https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01">draft-holmer-rmcat-transport-wide-cc-extensions-01</a></td>
+</tr>
+<tr>
+<td>Extension</td>
+<td>31</td>
+<td><a href="https://www.iana.org/go/rfc4585">RFC4585</a></td>
+</tr>
+</tbody>
+</table>
+<p>详见：https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml#rtp-parameters-8</p>
+<h4 id="nack">NACK</h4>
+<p>WebRTC中，当发送端和接收端SDP协商都支持RTX，重传会发送RTX包，否则还是使用RTP包。</p>
+<p>RTX包的PT和FMT和NACK包一样，重发的包封装到RTX包里发送，RTX包与原RTP有不同的SSRC，不同的sequence，但是时间戳与丢失包的时间戳相同。RTX包在带宽估计时不计入运算，不使用RTX统计丢包率会出现错误。RTX包的前两个字节代表丢失包的sequence，因此RTX包比丢失的RTP包多2个字节。</p>
+<p>但是RTX包不一定都是重传包，当prover打开时，padding数据也会通过RTX包发送。</p>
+<h3 id="psfb">PSFB</h3>
+<p>PSFB是负载反馈包，用于媒体信息的传输控制。</p>
+<h4 id="消息子类型-1">消息子类型</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>FMT（Feedback Message Type）</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PLI（Picture Loss Indication）</td>
+<td>1</td>
+<td>PLI用于接收方向发送方请求视频关键帧。<a href="https://tools.ietf.org/html/rfc4585">rfc4585</a></td>
+</tr>
+<tr>
+<td>SLI（Slice Loss Indication）</td>
+<td>2</td>
+<td>当解码端需要刷新时，可以发送FIR消息给编码端，编码端此时发送关键帧，刷新解码端。<a href="https://tools.ietf.org/html/rfc4585">RFC4585</a></td>
+</tr>
+<tr>
+<td>RPSI（Reference Picture Selection Indication）</td>
+<td>3</td>
+<td><a href="https://tools.ietf.org/html/rfc4585">RFC4585</a></td>
+</tr>
+<tr>
+<td>FIR（Full Intra Request）</td>
+<td>4</td>
+<td><a href="https://tools.ietf.org/html/rfc5104"> RFC5104</a></td>
+</tr>
+<tr>
+<td>TSTR（Temporal-Spatial Trade-off Request）</td>
+<td>5</td>
+<td><a href="https://tools.ietf.org/html/rfc5104"> RFC5104</a></td>
+</tr>
+<tr>
+<td>TSTN（Temporal-Spatial Trade-off Notification）</td>
+<td>6</td>
+<td><a href="https://tools.ietf.org/html/rfc5104"> RFC5104</a></td>
+</tr>
+<tr>
+<td>VBCM（Video Back Channel Message）</td>
+<td>7</td>
+<td><a href="https://tools.ietf.org/html/rfc5104">RFC5104</a></td>
+</tr>
+<tr>
+<td>REMB（Receiver Estimated Maximum Bitrate）</td>
+<td>15</td>
+<td>REMBWebRTC中的拥塞控制算法，接收端发送该请，用于报告估算的最大带宽， <a href="https://tools.ietf.org/html/draft-alvestrand-rmcat-remb-03">draft-alvestrand-rmcat-remb-03</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="fir">FIR</h4>
+<p>类似PLI消息，但是PLI消息是用于丢包情况下的通知，而FIR却不是，在有些非丢包情况下，FIR就要用到。比如：</p>
+<ul>
+<li>解码端需要切换到另一路不同视频时，由于需要新的解码参数，所以可通过发送FIR消息，通知编码端生成关键帧，获取新的解码参数，刷新视频解码器</li>
+<li>在视频会议中，新用户随机时刻加入，各个编码端发送的视频不一定都是关键帧，所以新用户不一定能正常解码。此时该新加入用户发送FIR消息，通知各个编码端给它发关键帧，获取关键帧后即可正常解码</li>
+</ul>
+<blockquote>
+<p><a href="https://bloggeek.me/webrtcglossary/">https://bloggeek.me/webrtcglossary/</a></p>
+</blockquote>
 
         </div>
 
@@ -204,7 +318,7 @@
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://fangzhou.blog">方舟</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/2019-03-25-start/">https://fangzhou.blog/post/2019-03-25-start/</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/rtcp/">https://fangzhou.blog/post/rtcp/</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
     </ul>
 </div>
@@ -218,13 +332,15 @@
     <h2>See Also</h2>
     <ul class="listing">
         
-        <li><a href="/about/">关于我</a></li>
+        <li><a href="/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/">C&#43;&#43;父类vptr偏移地址计算错误导致的crash</a></li>
         
-        <li><a href="/post/rtcp/"></a></li>
+        <li><a href="/post/socket-option-reuseaddr-and-reuseport/">SO_REUSEADDR和SO_REUSEPORT的对比</a></li>
         
-        <li><a href="/archives/">归档</a></li>
+        <li><a href="/post/experimental-dtls-patch-of-nginx/">Nginx DTLS补丁带来的启发</a></li>
         
-        <li><a href="/search/">搜索</a></li>
+        <li><a href="/post/how-nginx-upgrades/">Nginx如何实现热升级/平滑升级</a></li>
+        
+        <li><a href="/post/srs-memory-leak-caused-by-entry-cache/">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a></li>
         
     </ul>
 </div>
@@ -232,11 +348,7 @@
 
         <div class="post-meta meta-tags">
             
-            <ul class="clearfix">
-                
-                <li><a href='/tags/test'>test</a></li>
-                
-            </ul>
+            没有标签
             
         </div>
     </article>
