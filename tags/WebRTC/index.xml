@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>WebRTC on 方舟的博客</title>
+    <link>https://fangzhou.blog/tags/WebRTC/</link>
+    <description>Recent content in WebRTC on 方舟的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 06 Aug 2022 20:32:14 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/WebRTC/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RTCP协议</title>
+      <link>https://fangzhou.blog/post/rtcp/</link>
+      <pubDate>Sat, 06 Aug 2022 20:32:14 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/rtcp/</guid>
+      <description>RTCP包的类型 名称 PT（Payload Type） 备注 SR（Sender Report） 200 发送端报告。发送端将自己的信息以及自己接收数据的统计信息报告给对端。 RR（Receiver Report） 201 接收端报告。接收端将自己接收数据的统计信息报告给对端。 SDES（Source Description Item</description>
+    </item>
+    
+  </channel>
+</rss>
