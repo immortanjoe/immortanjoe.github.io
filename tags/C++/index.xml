@@ -6,7 +6,16 @@
     <description>Recent content in C&#43;&#43; on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 29 Sep 2022 22:51:27 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/C++/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 04 Mar 2023 20:32:14 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/C++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43; map容器中无法找到存在的元素</title>
+      <link>https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/</link>
+      <pubDate>Sat, 04 Mar 2023 20:32:14 +0800</pubDate>
+      
+      <guid>https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/</guid>
+      <description>如果说一个元素存在于map中，但是find函数却找不到，你信吗？也就是下面的表达式成立： testMap.find(testMap.begin()-&amp;gt;first) == testMap.end() 问题现象 在SRS的gb28181分支中，有如下代码： while (true) { ... if(jitter_buffer-&amp;gt;FoundFrame(cur_timestamp)){ jitter_buffer-&amp;gt;GetFrame(&amp;amp;ps_buffer, ps_buflen, buffer_size, keyframe, cur_timestamp) } ... } jitter_buffer中存在用于存储frame信息的map容器，用frameMap代指。 class SrsRtpJitterBuffer { ... private: std::map&amp;lt;uint32_t, SrsRtpFrameBuffer*, TimestampLessThan&amp;gt;</description>
+    </item>
+    
     <item>
       <title>C&#43;&#43;父类vptr偏移地址计算错误导致的crash</title>
       <link>https://fangzhou.blog/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/</link>

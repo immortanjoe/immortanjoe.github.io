@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>C&#43;&#43; map容器中无法找到存在的元素 | 方舟的博客</title>
+    <meta property="og:title" content="C&#43;&#43; map容器中无法找到存在的元素 - 方舟的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-03-04T20:32:14&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-03-04T20:32:14&#43;08:00'>
+        
+    <meta name="Keywords" content="c&#43;&#43;, golang, istio, srs, service mesh, 音视频">
+    <meta name="description" content="C&#43;&#43; map容器中无法找到存在的元素">
+        
+    <meta name="author" content="方舟">
+    <meta property="og:url" content="https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://fangzhou.blog">
+                        方舟的博客
+                    </a>
+                
+                
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://fangzhou.blog">首页</a>
+                    
+                    <a  href="https://fangzhou.blog/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://fangzhou.blog/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://fangzhou.blog/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">C&#43;&#43; map容器中无法找到存在的元素</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2023年3月4日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/C&#43;&#43;'>C&#43;&#43;</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>如果说一个元素存在于map中，但是find函数却找不到，你信吗？也就是下面的表达式成立：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>testMap.find(testMap.begin()<span style="color:#000;font-weight:bold">-&gt;</span>first) <span style="color:#000;font-weight:bold">==</span> testMap.end()
+</span></span></code></pre></div><h2 id="问题现象">问题现象</h2>
+<p>在SRS的gb28181分支中，有如下代码：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">while</span> (<span style="color:#0086b3">true</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span>(jitter_buffer<span style="color:#000;font-weight:bold">-&gt;</span>FoundFrame(cur_timestamp)){
+</span></span><span style="display:flex;"><span>      jitter_buffer<span style="color:#000;font-weight:bold">-&gt;</span>GetFrame(<span style="color:#000;font-weight:bold">&amp;</span>ps_buffer, ps_buflen, buffer_size, keyframe, cur_timestamp)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>jitter_buffer</code>中存在用于存储frame信息的map容器，用<code>frameMap</code>代指。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SrsRtpJitterBuffer</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span> <span style="color:#000;font-weight:bold">private</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#000;font-weight:bold">::</span>map<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#458;font-weight:bold">uint32_t</span>, SrsRtpFrameBuffer<span style="color:#000;font-weight:bold">*</span>, TimestampLessThan<span style="color:#000;font-weight:bold">&gt;</span> frameMap;
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>jitter_buffer-&gt;FoundFrame</code>会检查<code>frameMap</code>第一个frame(<code>frameMap.begin</code>)是否接收完毕，如果第一个frame接收完毕，<code>jitter_buffer-&gt;FoundFrame</code>会返回<code>true</code>，并将frame的时间戳传递给<code>cur_timestamp</code>。</p>
+<p>然后<code>jitter_buffer-&gt;GetFrame</code>再根据<code>cur_timestamp</code>从frameMap中找到对应的frame(<code>frameMap.find</code>)，将frame从<code>frameMap</code>中删除(<code>frameMap.erase</code>)，然后将frame的buffer拷贝到<code>ps_buffer</code>中。</p>
+<p>理论上，如果<code>jitter_buffer-&gt;FoundFrame</code>为<code>true</code>，<code>jitter_buffer-&gt;GetFrame</code>一定也为<code>true</code>，因为<code>jitter_buffer-&gt;FoundFrame</code>返回的是<code>frameMap</code>第一个元素的key。但是在生产环境中，出现了<code>jitter_buffer-&gt;FoundFrame</code>为<code>true</code>，但是<code>jitter_buffer-&gt;GetFrame</code>失败的场景。即:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>frameMap.find(frameMap.begin()<span style="color:#000;font-weight:bold">-&gt;</span>first) <span style="color:#000;font-weight:bold">==</span> frameMap.end
+</span></span></code></pre></div><h2 id="问题分析">问题分析</h2>
+<p><code>frameMap</code>使用了自定义的比较函数：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>std<span style="color:#000;font-weight:bold">::</span>map<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#458;font-weight:bold">uint32_t</span>, SrsRtpFrameBuffer<span style="color:#000;font-weight:bold">*</span>, TimestampLessThan<span style="color:#000;font-weight:bold">&gt;</span> frameMap;
+</span></span></code></pre></div><p>比较函数：</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">inline</span> <span style="color:#458;font-weight:bold">bool</span> <span style="color:#900;font-weight:bold">IsNewerTimestamp</span>(<span style="color:#458;font-weight:bold">uint32_t</span> timestamp, <span style="color:#458;font-weight:bold">uint32_t</span> prev_timestamp)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">return</span> timestamp <span style="color:#000;font-weight:bold">!=</span> prev_timestamp <span style="color:#000;font-weight:bold">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>           <span style="color:#000;font-weight:bold">static_cast</span><span style="color:#000;font-weight:bold">&lt;</span><span style="color:#458;font-weight:bold">uint32_t</span><span style="color:#000;font-weight:bold">&gt;</span>(timestamp <span style="color:#000;font-weight:bold">-</span> prev_timestamp) <span style="color:#000;font-weight:bold">&lt;</span> <span style="color:#099">0x80000000</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">TimestampLessThan</span> {
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">public</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">bool</span> <span style="color:#000;font-weight:bold">operator</span>() (<span style="color:#000;font-weight:bold">const</span> <span style="color:#458;font-weight:bold">uint32_t</span><span style="color:#000;font-weight:bold">&amp;</span> timestamp1,
+</span></span><span style="display:flex;"><span>                     <span style="color:#000;font-weight:bold">const</span> <span style="color:#458;font-weight:bold">uint32_t</span><span style="color:#000;font-weight:bold">&amp;</span> timestamp2) <span style="color:#000;font-weight:bold">const</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#900;font-weight:bold">IsNewerTimestamp</span>(timestamp2, timestamp1);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p><code>frameMap</code>以RTP包的时间戳<code>timstamp</code>作为key，因为RTP包的接收可能发生乱序（服务端先收到时间戳靠后的包），或者RTP包的时间戳发生溢出（时间戳单位为uint32，即超出2^32-1后会从0重新开始计数），所以不能单纯按照时间戳数值的大小 或者 接收顺序来对RTP包进行排序。
+<code>SRS</code>自定义了<code>TimestampLessThan </code>作为比较类，通过前后两个时间戳相减是否小于<code>0x80000000</code>（2^32的一半），对RTP包进行排序，这也是一般的做法。如果<code>timestamp</code> - <code>prev_timestamp</code> &lt; <code>0x80000000</code>，说明时间戳变化较小，时间戳为<code>timestamp</code>的RTP包要比时间戳为 <code>prev_timestamp</code> 的RTP包排序靠后的。比如：RTP包（timestamp: <code>3601</code> ）的排序要比RTP包（timestamp: <code>1</code> ）靠后，RTP包（timestamp: <code>195</code>）的排序要比 RTP包（timestamp: <code>4294963895</code>）靠后（时间戳发生溢出）。
+但是，C++的map使用的是红黑树，每次插入时Compare操作依赖map插入位置元素的Key值。如果插入元素的Key值（时间戳）变化幅度比较大（RTP丢包 或者 异常RTP包），和红黑树的节点的key值差正好处于·0x80000000·这个值的附近变化，或者 红黑树节点位置发生了变化，就可能出现排序异常的问题。</p>
+<p>比如，</p>
+<ol>
+<li><code>frameMap</code>初始为空，连续插入元素，key值分别为：<code>1563269838</code>, <code>1715825084</code>，此时红黑树根节点为<code>1563269838</code>， frameMap中元素顺序为：[<code>1563269838</code>, <code>1715825084</code>]</li>
+<li>再插入元素，key值为<code>3907570622</code>，因为红黑树根节点key值为<code>1563269838</code>，<code>IsNewerTimestamp(3907570622, 1563269838)</code>为<code>false</code>，<code>3907570622</code>会排序到<code>1563269838</code>前面，<code>frameMap</code>中元素顺序为：[<code>3907570622</code>，<code>1563269838</code>, <code>1715825084</code>]</li>
+<li>连续插入元素，key值分别为：<code>2654213860</code>, <code>2654218360</code>, <code>2654218360</code>, <code>2654209360</code>, <code>2654222860</code>, <code>2654204860</code>，为了平衡二叉树，红黑树根节点左旋变为：<code>2653831360</code>，<code>frameMap</code>中元素顺序为：[<code>3907570622</code>，<code>1563269838</code>, <code>1715825084</code>，<code>2654213860</code>, <code>2654218360</code>, <code>2654218360</code>, <code>2654209360</code>, <code>2654222860</code>, <code>2654204860</code> ]</li>
+<li>此时在<code>frameMap</code>中查找key值为<code>3907570622</code>的元素，也就是<code>frameMap</code>的第一个元素。第一次比较会先和和红黑树的根节点进行比较，此时根节点元素的key值为<code>2653831360</code>， <code>IsNewerTimestamp(3907570622, 2653831360)</code>为<code>true</code>，所以会在红黑树根节点的右子树中查找，但是key为<code>3907570622</code>的元素在根节点的左子树中，导致查找失败。</li>
+</ol>
+<h2 id="问题解决">问题解决</h2>
+<p>发生这个问题，说明服务端收到的RTP包时间戳出现了较大幅度的跳变，网络出现了严重抖动。这种情况下，即使能在<code>frameMap</code>中找到对应的frame信息，客户端也无法正常播放。为了避免死循环，再判断一下<code>jitter_buffer-&gt;GetFrame</code>的结果，如果为<code>false</code>直接返回错误即可.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">while</span> (<span style="color:#0086b3">true</span>) {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span>(jitter_buffer<span style="color:#000;font-weight:bold">-&gt;</span>FoundFrame(cur_timestamp)){
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">if</span>(<span style="color:#000;font-weight:bold">!</span>jitter_buffer<span style="color:#000;font-weight:bold">-&gt;</span>GetFrame(<span style="color:#000;font-weight:bold">&amp;</span>ps_buffer, ps_buflen, buffer_size, keyframe, cur_timestamp)) {
+</span></span><span style="display:flex;"><span>          <span style="color:#000;font-weight:bold">return</span> srs_error_new()
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://fangzhou.blog">方舟</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/">https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/">C&#43;&#43;父类vptr偏移地址计算错误导致的crash</a></li>
+        
+        <li><a href="/post/srs-memory-leak-caused-by-entry-cache/">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a></li>
+        
+        <li><a href="/post/how-srs-deals-with-rtp-packet-loss/">SRS如何处理RTP丢包</a></li>
+        
+        <li><a href="/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/">RTP时间戳错误引起的视频花屏</a></li>
+        
+        <li><a href="/post/rtcp/">RTCP协议</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/C&#43;&#43;'>C&#43;&#43;</a></li>
+                
+                <li><a href='/tags/map'>map</a></li>
+                
+                <li><a href='/tags/%E7%BA%A2%E9%BB%91%E6%A0%91'>红黑树</a></li>
+                
+                <li><a href='/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D'>问题定位</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "immortanjoe/blogtalk"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    
+    <br />
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'G-3TE63Y62EWK', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://fangzhou.blog/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://fangzhou.blog">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://fangzhou.blog/post/element-in-map-but-find-fails-cpp/" title="C&#43;&#43; map容器中无法找到存在的元素">C&#43;&#43; map容器中无法找到存在的元素</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/crash-caused-by-incorrect-offset-of-parent-class-pointer/" title="C&#43;&#43;父类vptr偏移地址计算错误导致的crash">C&#43;&#43;父类vptr偏移地址计算错误导致的crash</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/rtcp/" title="RTCP协议">RTCP协议</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/socket-option-reuseaddr-and-reuseport/" title="SO_REUSEADDR和SO_REUSEPORT的对比">SO_REUSEADDR和SO_REUSEPORT的对比</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/experimental-dtls-patch-of-nginx/" title="Nginx DTLS补丁带来的启发">Nginx DTLS补丁带来的启发</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-nginx-upgrades/" title="Nginx如何实现热升级/平滑升级">Nginx如何实现热升级/平滑升级</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/srs-memory-leak-caused-by-entry-cache/" title="SrsHttpMuxEntry缓存引起的SRS内存泄漏">SrsHttpMuxEntry缓存引起的SRS内存泄漏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/how-srs-deals-with-rtp-packet-loss/" title="SRS如何处理RTP丢包">SRS如何处理RTP丢包</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/video-smearing-issue-caused-by-incorrect-rtp-timestamp/" title="RTP时间戳错误引起的视频花屏">RTP时间戳错误引起的视频花屏</a>
+    </li>
+    
+    <li>
+        <a href="https://fangzhou.blog/post/quick-sort-partition/" title="快速排序的partition">快速排序的partition</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://fangzhou.blog/categories/C&#43;&#43;/">C&#43;&#43; (2)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/Linux/">Linux (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/Nginx/">Nginx (2)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/SRS/">SRS (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/WebRTC/">WebRTC (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E6%B5%81%E5%AA%92%E4%BD%93/">流媒体 (1)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E6%B5%81%E5%AA%92%E4%BD%93%E6%9C%8D%E5%8A%A1/">流媒体服务 (3)</a></li>
+    
+    <li><a href="https://fangzhou.blog/categories/%E7%AE%97%E6%B3%95/">算法 (1)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://fangzhou.blog/tags/C&#43;&#43;/">C&#43;&#43;</a>
+    
+    <a href="https://fangzhou.blog/tags/DTLS/">DTLS</a>
+    
+    <a href="https://fangzhou.blog/tags/GB28181/">GB28181</a>
+    
+    <a href="https://fangzhou.blog/tags/Linux/">Linux</a>
+    
+    <a href="https://fangzhou.blog/tags/Nginx/">Nginx</a>
+    
+    <a href="https://fangzhou.blog/tags/PSFB/">PSFB</a>
+    
+    <a href="https://fangzhou.blog/tags/PS%E6%B5%81/">PS流</a>
+    
+    <a href="https://fangzhou.blog/tags/RTCP/">RTCP</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP/">RTP</a>
+    
+    <a href="https://fangzhou.blog/tags/RTPFB/">RTPFB</a>
+    
+    <a href="https://fangzhou.blog/tags/RTP%E4%B8%A2%E5%8C%85/">RTP丢包</a>
+    
+    <a href="https://fangzhou.blog/tags/SO_REUSEADDR/">SO_REUSEADDR</a>
+    
+    <a href="https://fangzhou.blog/tags/SO_REUSEPORT/">SO_REUSEPORT</a>
+    
+    <a href="https://fangzhou.blog/tags/SRS/">SRS</a>
+    
+    <a href="https://fangzhou.blog/tags/UDP/">UDP</a>
+    
+    <a href="https://fangzhou.blog/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://fangzhou.blog/tags/crash/">crash</a>
+    
+    <a href="https://fangzhou.blog/tags/map/">map</a>
+    
+    <a href="https://fangzhou.blog/tags/memory-leak/">memory leak</a>
+    
+    <a href="https://fangzhou.blog/tags/partition/">partition</a>
+    
+    <a href="https://fangzhou.blog/tags/socket/">socket</a>
+    
+    <a href="https://fangzhou.blog/tags/test/">test</a>
+    
+    <a href="https://fangzhou.blog/tags/vptr/">vptr</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">内存泄漏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%B9%B3%E6%BB%91%E5%8D%87%E7%BA%A7/">平滑升级</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/">快排</a>
+    
+    <a href="https://fangzhou.blog/tags/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E6%8E%92%E5%BA%8F/">排序</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%83%AD%E5%8D%87%E7%BA%A7/">热升级</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%BA%A2%E9%BB%91%E6%A0%91/">红黑树</a>
+    
+    <a href="https://fangzhou.blog/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%8A%B1%E5%B1%8F/">花屏</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%99%9A%E7%BB%A7%E6%89%BF/">虚继承</a>
+    
+    <a href="https://fangzhou.blog/tags/%E8%99%9A%E8%A1%A8/">虚表</a>
+    
+    <a href="https://fangzhou.blog/tags/%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D/">问题定位</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://fangzhou.blog/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
