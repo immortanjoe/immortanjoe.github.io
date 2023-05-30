@@ -5,7 +5,7 @@
     <link>https://fangzhou.blog/tags/vptr/</link>
     <description>Recent content in vptr on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
+    <language>zh-CN</language>
     <lastBuildDate>Thu, 29 Sep 2022 22:51:27 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/vptr/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>C&#43;&#43;父类vptr偏移地址计算错误导致的crash</title>
