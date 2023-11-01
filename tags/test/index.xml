@@ -6,15 +6,14 @@
     <description>Recent content in test on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 25 Mar 2019 19:34:22 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/test/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 25 Mar 2019 19:34:22 +0800</lastBuildDate>
+    <atom:link href="https://fangzhou.blog/tags/test/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hello world</title>
       <link>https://fangzhou.blog/post/2019-03-25-start/</link>
       <pubDate>Mon, 25 Mar 2019 19:34:22 +0800</pubDate>
-      
       <guid>https://fangzhou.blog/post/2019-03-25-start/</guid>
       <description>We are at the crossroads of destiny.</description>
     </item>
-    
   </channel>
 </rss>

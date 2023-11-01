@@ -6,15 +6,14 @@
     <description>Recent content in 快排 on 方舟的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 26 Mar 2022 10:55:28 +0800</lastBuildDate><atom:link href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 26 Mar 2022 10:55:28 +0800</lastBuildDate>
+    <atom:link href="https://fangzhou.blog/tags/%E5%BF%AB%E6%8E%92/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>快速排序的partition</title>
       <link>https://fangzhou.blog/post/quick-sort-partition/</link>
       <pubDate>Sat, 26 Mar 2022 10:55:28 +0800</pubDate>
-      
       <guid>https://fangzhou.blog/post/quick-sort-partition/</guid>
       <description>前言 快速排序是几个最基本的算法之一，但是作为一个算法渣渣，我并不觉得它是一个很简单的算法。我甚至花费了很多时间反复理解、记忆、实现，但所做的一切还只是停留在理解前人思想的阶段，这不免让人感到沮丧。 代码示例 下面的快速排序是基于《算法导论》中的伪代码，通过递归实现的： func partition(nums []int, l, r int) int {</description>
     </item>
-    
   </channel>
 </rss>
